@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+INAGA Portfolio Site
+クリエイター「いなが」の音楽・デザイン作品を展示する公式ポートフォリオサイトです。
 
-## Getting Started
 
-First, run the development server:
+★ Tech Stack
+Framework: Next.js
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Styling: Tailwind CSS
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Animation: Framer Motion
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Icons: React Icons
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Deployment: Vercel
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+★ Key Features
+Dynamic Visual Experience: 全画面表示のレスポンシブロゴによるインパクトのあるファーストビュー。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Horizontal Scroll: MUSIC/DESIGNそれぞれのセクションで、横スクロールによる作品閲覧。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Visual Hints: スクロール量に応じて変化する左右のグラデーション（もや）エフェクト。
 
-## Deploy on Vercel
+Instagram-style Grid: 「VIEW ALL」から飛べる一覧ページでは、Instagramライクな正方形グリッドレイアウトを採用。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Dynamic Work Details: 作品ごとに専用の詳細ページを自動生成。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Optimized Performance: lib/works.ts によるデータ一括管理システム。1箇所の修正でサイト全体の作品情報が更新されます。
+
+
+★ Project Structure
+
+app/
+  ├── work-type/
+  │     └── [type]/     # MUSIC/DESIGN別の一覧ページ
+  └── work-slug/
+        └── [slug]/     # 作品ごとの詳細ページ
+lib/
+  └── works.ts          # 作品データの管理（DBの役割）
+public/
+  └── images/           # 各作品の画像アセット
+
+
+★ For Creator inaga
+新しい作品を追加したいとき↓
+
+① public/images/MUSIC WORKS/ または DESIGN WORKS/ フォルダに画像を入れる
+
+② lib/works.ts を開き、既存のデータをコピーして新しい情報をうまいこと書き換えて
+
+③ descriptionとtool書いて。ここの改行はそのまま反映されるはず
+
+④ 保存してプッシュ
+
+
+★ Credits
+Artist / Creator: Inaga
+Developer: Oganesson
