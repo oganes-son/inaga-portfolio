@@ -1,6 +1,8 @@
 "use client";
-import { motion } from "framer-motion";
-import { FaXTwitter, FaSoundcloud, FaYoutube, FaInstagram } from "react-icons/fa6";
+import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useRef } from "react";
+import { FaXTwitter, FaSoundcloud, FaYoutube, FaInstagram, FaRegEnvelope } from "react-icons/fa6";
 
 function AnimatedLink({ href, text }: { href: string; text: string }) {
   return (
@@ -21,13 +23,37 @@ function FooterAnimatedLink({ href, text }: { href: string; text: string }) {
 }
 
 export default function Home() {
-  
-  // 🟢 作品データ：タイトルをファイル名（拡張子を除いたもの）に修正しました
+
+  {/*作品はここにおいて！*/}
   const musicWorks = [
-    { id: 1, filename: "ALBUM　PARADIGM SHIFT.png", title: "ALBUM　PARADIGM SHIFT", date: "202X.XX.XX" },
-    { id: 2, filename: "CYBER METROPLEX.png", title: "CYBER METROPLEX", date: "202X.XX.XX" },
-    { id: 3, filename: "Fantasie Impromptu (Remix).png", title: "Fantasie Impromptu (Remix)", date: "202X.XX.XX" },
-    { id: 4, filename: "Purify.png", title: "Purify", date: "202X.XX.XX" },
+    { 
+      id: 1, 
+      filename: "ALBUM　PARADIGM SHIFT.png", 
+      title: "ALBUM　PARADIGM SHIFT", 
+      soundcloud: "https://soundcloud.com/sgextgl4iyy9",
+      youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ"
+    },
+    { 
+      id: 2, 
+      filename: "CYBER METROPLEX.png", 
+      title: "CYBER METROPLEX",
+      soundcloud: "https://soundcloud.com/sgextgl4iyy9",
+      youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ"
+    },
+    { 
+      id: 3, 
+      filename: "Fantasie Impromptu (Remix).png", 
+      title: "Fantasie Impromptu (Remix)",
+      soundcloud: "https://soundcloud.com/sgextgl4iyy9",
+      youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ"
+    },
+    { 
+      id: 4, 
+      filename: "Purify.png", 
+      title: "Purify",
+      soundcloud: "https://soundcloud.com/sgextgl4iyy9",
+      youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ"
+    },
   ];
 
   const designWorks = [
@@ -40,41 +66,115 @@ export default function Home() {
     { id: 7, filename: "年賀状2026.png", title: "年賀状2026" },
   ];
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  // 画面幅がPCサイズ(768px以上)になったらメニューを閉じる
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f4f7f6] text-[#333333] relative overflow-x-hidden">
       
       {/* ヘッダー */}
-      <header className="fixed top-0 left-0 w-full h-20 bg-white z-50 flex items-center justify-between px-10 shadow-sm">
-        <nav className="flex gap-8 text-[12.2pt]">
+      <header className="fixed top-0 left-0 w-full h-20 bg-white/90 backdrop-blur-md z-[100] flex items-center justify-between px-6 md:px-10 shadow-sm">
+        {/* PC用ナビゲーション (md以上で表示) */}
+        <nav className="hidden md:flex gap-8 text-[12.2pt]">
           <AnimatedLink href="#about" text="ABOUT" />
           <AnimatedLink href="#works" text="WORKS" />
           <AnimatedLink href="#news" text="NEWS" />
           <AnimatedLink href="#contact" text="CONTACT" />
         </nav>
 
-        <div className="flex gap-6 text-[28px]">
+        {/* PC用SNSアイコン (md以上で表示) */}
+        <div className="hidden md:flex gap-6 text-[28px]">
           <a href="https://x.com/inaga_P" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FaXTwitter /></a>
           <a href="https://soundcloud.com/sgextgl4iyy9" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FaSoundcloud /></a>
           <a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FaYoutube /></a>
           <a href="https://www.instagram.com/inaga__inaga" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FaInstagram /></a>
         </div>
+
+        {/* スマホ用ハンバーガーボタン (md以下で表示) */}
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden z-[110] relative w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none"
+        >
+          <motion.span 
+            animate={isOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+            className="w-8 h-0.5 bg-[#333333] block" 
+          />
+          <motion.span 
+            animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
+            className="w-8 h-0.5 bg-[#333333] block" 
+          />
+          <motion.span 
+            animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+            className="w-8 h-0.5 bg-[#333333] block" 
+          />
+        </button>
+
+        {/* スマホ用フルスクリーンメニュー */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed inset-0 bg-white z-[105] flex flex-col items-center justify-center"
+            >
+              <nav className="flex flex-col items-center gap-10 text-[24pt] font-['Bahnschrift'] tracking-widest">
+                <a href="#about" onClick={() => setIsOpen(false)}>ABOUT</a>
+                <a href="#works" onClick={() => setIsOpen(false)}>WORKS</a>
+                <a href="#news" onClick={() => setIsOpen(false)}>NEWS</a>
+                <a href="#contact" onClick={() => setIsOpen(false)}>CONTACT</a>
+              </nav>
+              
+              <div className="flex gap-8 text-[32px] mt-16">
+                <a href="https://x.com/inaga_P" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+                <a href="https://soundcloud.com/sgextgl4iyy9" target="_blank" rel="noopener noreferrer"><FaSoundcloud /></a>
+                <a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+                <a href="https://www.instagram.com/inaga__inaga" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <div className="relative z-10 pt-20">
         
-        {/* ファーストビュー */}
+        {/*ファーストビューfirst view*/}
         <main className="h-[calc(100vh-80px)] w-full flex flex-col justify-center items-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: "easeOut" }} className="w-full text-center">
-            <img src="/images/top_logo.png" alt="inaga" className="w-full h-auto object-cover mb-6" />
+            {/* ロゴのPC・スマホ切り替え */}
+            <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover mb-6" />
+            <img src="/images/top_logo_nocut.png" alt="inaga" className="block md:hidden w-full h-auto object-contain mb-6" />
           </motion.div>
         </main>
 
         {/* ABOUTセクション */}
-        <section id="about" className="max-w-4xl mx-auto py-32 px-6 min-h-screen flex flex-col justify-center">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }} className="text-left">
+        <section id="about" className="max-w-4xl mx-auto py-32 px-6 min-h-screen flex flex-col justify-center relative overflow-hidden">
+          
+          {/*スクロール連動の背景画像*/}
+          <AboutBackgroundImage />
+
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true, margin: "-100px" }} 
+            transition={{ duration: 0.8 }} 
+            className="text-left relative z-10"
+          >
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest">ABOUT</h2>
             <div className="space-y-6 leading-relaxed font-['Mobo'] font-normal text-[12.2pt]">
-              <p className="text-[45.7pt] font-['Mobo-bold'] leading-none mb-6">いなが</p>
+              {/* 🟢 「いなが」の上下余白（mt, mb）と行間（leading）を調整しました */}
+              <p className="text-[32pt] md:text-[45.7pt] font-['Mobo-bold'] leading-tight mt-10 mb-12">いなが</p>
               <p>2004年11月24日生まれの21歳。札幌在住。</p>
               <p>音楽やグラフィックデザインを制作。</p>
               <p>北海道大学工学部情報エレクトロニクス学科所属。</p>
@@ -82,47 +182,69 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* WORKSセクション */}
+        {/*ワークスWORKS*/}
         <section id="works" className="max-w-4xl mx-auto py-32 px-6 min-h-screen flex flex-col justify-center">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }} className="text-left w-full">
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest">WORKS</h2>
             
-            {/* MUSIC エリア */}
-            <div className="mb-16">
-              <h3 className="text-[16pt] font-['Bahnschrift'] mb-6 tracking-widest border-b border-[#333333]/20 pb-2">MUSIC</h3>
-              <div className="flex overflow-x-auto gap-6 pb-6 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/*ミュージックMUSIC*/}
+            <div className="mb-20">
+              <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2">MUSIC</h3>
+              {/*横スクロール維持：snap-xでピタッと止まるように設定*/}
+              <div className="flex overflow-x-auto gap-10 pb-12 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {musicWorks.map((work) => (
-                  <div key={`music-${work.id}`} className="group relative overflow-hidden min-w-[280px] aspect-square bg-white rounded-2xl shadow-sm snap-start flex flex-col justify-end font-['Mobo'] text-[12.2pt] cursor-pointer border border-[#333333]/10">
-                    <img src={`/images/MUSIC WORKS/${work.filename}`} alt={work.title} className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-500 group-hover:scale-110" />
-                    <div className="relative z-10 p-6 bg-gradient-to-t from-white via-white/80 to-transparent">
-                      <p className="font-bold mb-1">{work.title}</p>
-                      <p className="text-sm opacity-70">{work.date}</p>
+                  <div key={`music-${work.id}`} className="group flex flex-col gap-4 snap-start shrink-0">
+                    {/*画像の高さ指定はここでする。現在は(h-[300px])で固定。影を最大級(shadow-2xl)に設定*/}
+                    <div className="relative rounded-lg shadow-2xl border border-[#333333]/5 bg-white overflow-hidden h-[300px]">
+                      <img 
+                        src={`/images/MUSIC WORKS/${work.filename}`} 
+                        alt={work.title} 
+                        className="h-full w-auto object-contain transition-transform duration-500 group-hover:scale-105" 
+                      />
+                    </div>
+                    {/*画像の下に配置するタイトルとSNSアイコン*/}
+                    <div className="font-['Mobo'] px-1">
+                      <p className="font-['Mobo'] text-[12.2pt] mb-3">{work.title}</p>
+                      {/*サウンドクラウドとYouTubeのアイコンを順に並べる*/}
+                      <div className="flex gap-6 text-[28px] text-[#333333] mt-3">
+                        <a href={work.soundcloud} target="_blank" rel="noopener noreferrer" className="transition-transform duration-300 hover:scale-110 inline-block">
+                          <FaSoundcloud />
+                        </a>
+                        <a href={work.youtube} target="_blank" rel="noopener noreferrer" className="transition-transform duration-300 hover:scale-110 inline-block">
+                          <FaYoutube />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* DESIGN エリア */}
+            {/* デザインDESIGN */}
             <div>
-              <h3 className="text-[16pt] font-['Bahnschrift'] mb-6 tracking-widest border-b border-[#333333]/20 pb-2">DESIGN</h3>
-              <div className="flex overflow-x-auto gap-6 pb-6 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2">DESIGN</h3>
+              <div className="flex overflow-x-auto gap-10 pb-12 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {designWorks.map((work) => (
-                  <div key={`design-${work.id}`} className="group relative overflow-hidden min-w-[280px] aspect-square bg-white rounded-2xl shadow-sm snap-start flex flex-col justify-end font-['Mobo'] text-[12.2pt] cursor-pointer border border-[#333333]/10">
-                    <img src={`/images/DESIGN WORKS/${work.filename}`} alt={work.title} className="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-500 group-hover:scale-110" />
-                    <div className="relative z-10 p-6 bg-gradient-to-t from-white via-white/80 to-transparent">
-                      <p className="font-bold mb-1">{work.title}</p>
-                      <p className="text-sm opacity-70">グラフィックデザイン</p>
+                  <div key={`design-${work.id}`} className="group flex flex-col gap-4 snap-start shrink-0">
+                    {/*画像の高さ指定はここでする。現在は(h-[300px])で固定*/}
+                    <div className="relative rounded-lg shadow-2xl border border-[#333333]/5 bg-white overflow-hidden h-[300px]">
+                      <img 
+                        src={`/images/DESIGN WORKS/${work.filename}`} 
+                        alt={work.title} 
+                        className="h-full w-auto object-contain transition-transform duration-500 group-hover:scale-105" 
+                      />
+                    </div>
+                    <div className="font-['Mobo'] px-1">
+                      <p className="font-['Mobo'] text-[12.2pt]">{work.title}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-
           </motion.div>
         </section>
 
-        {/* NEWSセクション */}
+        {/*NEWS*/}
         <section id="news" className="max-w-4xl mx-auto py-32 px-6 min-h-[60vh] flex flex-col justify-center">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }} className="text-left">
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest">NEWS</h2>
@@ -135,7 +257,7 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* CONTACTセクション */}
+        {/*CONTACT*/}
         <section id="contact" className="max-w-4xl mx-auto py-32 px-6 min-h-[60vh] flex flex-col justify-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -146,50 +268,63 @@ export default function Home() {
           >
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest">CONTACT</h2>
             
-            <div className="font-['Mobo'] font-normal text-[12.2pt]">
-              <p className="mb-12 leading-relaxed">
-                お仕事のご依頼やお問い合わせは、以下のボタンよりお気軽にご連絡ください。
-              </p>
-              
-              {/* 🟢 ボタン形式のリンクエリア */}
-              <div className="flex flex-wrap gap-8">
-                {/* Mailボタン */}
-                <a 
-                  href="mailto:example@gmail.com" 
-                  className="group flex items-center gap-4 text-[24pt] font-bold border-b-2 border-[#333333] pb-1 hover:text-emerald-600 hover:border-emerald-600 transition-all duration-300"
+            <div className="flex flex-col gap-10">
+              {/*Mail*/}
+              <motion.a 
+                href="mailto:inagainagainaga@gmail.com" 
+                initial="initial" 
+                whileHover="hover"
+                className="relative group flex items-center gap-6 text-[15pt] md:text-[18pt] text-[#333333] w-fit"
+              >
+                <motion.div 
+                  className="flex items-center gap-6"
+                  variants={{ initial: { scale: 1 }, hover: { scale: 1.05 } }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <span className="font-['Bahnschrift']">Mail</span>
-                  <motion.span 
-                    className="text-[18pt]"
-                    variants={{ initial: { x: 0 }, hover: { x: 10 } }}
-                  >
-                    →
-                  </motion.span>
-                </a>
+                  <FaRegEnvelope className="text-[15pt] md:text-[18pt]" />
+                  <span className="font-['Bahnschrift'] tracking-tight">
+                    inagainagainaga@gmail.com
+                  </span>
+                </motion.div>
+                <motion.span 
+                  variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} 
+                  transition={{ duration: 0.2 }} 
+                  className="absolute -bottom-1 w-full h-[2px] bg-[#333333] origin-center" 
+                />
+              </motion.a>
 
-                {/* Xボタン */}
-                <a 
-                  href="https://x.com/inaga_P" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-4 text-[24pt] font-bold border-b-2 border-[#333333] pb-1 hover:text-emerald-600 hover:border-emerald-600 transition-all duration-300"
+              {/*X*/}
+              <motion.a 
+                href="https://x.com/inaga_P" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                initial="initial" 
+                whileHover="hover"
+                className="relative group flex items-center gap-6 text-[15pt] md:text-[18pt] text-[#333333] w-fit"
+              >
+                <motion.div 
+                  className="flex items-center gap-6"
+                  variants={{ initial: { scale: 1 }, hover: { scale: 1.05 } }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <span className="font-['Bahnschrift']">X</span>
-                  <motion.span 
-                    className="text-[18pt]"
-                    variants={{ initial: { x: 0 }, hover: { x: 10 } }}
-                  >
-                    →
-                  </motion.span>
-                </a>
-              </div>
+                  <FaXTwitter className="text-[15pt] md:text-[18pt]" />
+                  <span className="font-['Bahnschrift'] tracking-tight">
+                    @inaga_P
+                  </span>
+                </motion.div>
+                <motion.span 
+                  variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} 
+                  transition={{ duration: 0.2 }} 
+                  className="absolute -bottom-1 w-full h-[2px] bg-[#333333] origin-center" 
+                />
+              </motion.a>
             </div>
           </motion.div>
         </section>
 
       </div>
 
-      {/* フッター */}
+      {/*フッター*/}
       <footer className="bg-[#333333] text-white py-16 relative z-10 flex flex-col items-center gap-10">
         <nav className="flex flex-wrap justify-center gap-8 text-[12.2pt]">
           <FooterAnimatedLink href="#about" text="ABOUT" />
@@ -199,11 +334,41 @@ export default function Home() {
         </nav>
       </footer>
 
-      {/* フッター画像 */}
+      {/*フッター画像*/}
       <div className="bg-[#333333] w-full flex justify-center pb-10 relative z-10">
         <img src="/images/footer_logo.png" alt="Footer decoration" className="max-w-[250px] w-full px-6 h-auto" />
       </div>
 
+    </div>
+  );
+}
+
+//アバウトABOUTの背景画像のアニメーション
+function AboutBackgroundImage() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+
+  const x = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], ["100%", "0%", "0%", "-100%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 0.3, 0.3, 0]);
+
+  return (
+    <div ref={ref} className="absolute inset-0 pointer-events-none select-none">
+      <motion.div
+        style={{ x, opacity }}
+        className="absolute right-0 top-1/2 -translate-y-1/2 w-full h-full flex justify-end items-center"
+      >
+        <div className="relative w-[80%] h-[80%] flex justify-end">
+          <img 
+            src="/images/top_logo_nocut.png" 
+            alt="" 
+            className="h-full w-auto object-contain object-right"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#f4f7f6] via-[#f4f7f6]/40 to-transparent w-full h-full" />
+        </div>
+      </motion.div>
     </div>
   );
 }
