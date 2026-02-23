@@ -15,7 +15,7 @@ export const musicWorks: Work[] = [
   { 
     id: 1, //id昇順に左から並ぶことになります
     slug: "paradigm-shift", 
-    filename: "ALBUM PARADIGM SHIFT.png", //imagesフォルダにアップロードした画像ファイル名
+    filename: "PARADIGM_SHIFT.png", //imagesフォルダにアップロードした画像ファイル名
     title: "ALBUM PARADIGM SHIFT",//タイトル
     description: "ここに作品のコンセプトとか伝えたいこととかあったら書いてもらって。",//詳細説明文など
     tool: "お金, 時間, やる気, おいしいごはん",//使用ツールなど。ポートフォリオとしてはあった方がいいかなって。
@@ -23,8 +23,8 @@ export const musicWorks: Work[] = [
     youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ"
   },
 
-  { id: 2, slug: "cyber-metroplex", filename: "CYBER METROPLEX.png", title: "CYBER METROPLEX", description: "", tool: "", soundcloud: "https://soundcloud.com/sgextgl4iyy9", youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" },
-  { id: 3, slug: "fantasie-impromptu", filename: "Fantasie Impromptu (Remix).png", title: "Fantasie Impromptu (Remix)", description: "", tool: "", soundcloud: "https://soundcloud.com/sgextgl4iyy9", youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" },
+  { id: 2, slug: "cyber-metroplex", filename: "CYBER_METROPLEX.png", title: "CYBER METROPLEX", description: "", tool: "", soundcloud: "https://soundcloud.com/sgextgl4iyy9", youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" },
+  { id: 3, slug: "fantasie-impromptu", filename: "Fantasie_Impromptu(Remix).png", title: "Fantasie Impromptu (Remix)", description: "", tool: "", soundcloud: "https://soundcloud.com/sgextgl4iyy9", youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" },
   { id: 4, slug: "purify", filename: "Purify.png", title: "Purify", description: "", tool: "", soundcloud: "https://soundcloud.com/sgextgl4iyy9", youtube: "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" },
 ];
 
