@@ -83,7 +83,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#f4f7f6] text-[#333333] relative overflow-x-hidden">
       
       {/* ヘッダー */}
-      <header className="fixed top-0 left-0 w-full h-20 bg-white/90 backdrop-blur-md z-[100] flex items-center justify-between px-6 md:px-10 shadow-sm">
+      <header className="fixed top-0 left-0 w-full h-0 md:h-20 md:bg-white/90 md:backdrop-blur-md z-[100] flex items-center justify-between px-6 md:px-10 md:shadow-sm">
         {/* PC用ナビゲーション (md以上で表示) */}
         <nav className="hidden md:flex gap-8 text-[12.2pt]">
           <AnimatedLink href="#about" text="ABOUT" />
@@ -100,10 +100,10 @@ export default function Home() {
           <a href="https://www.instagram.com/inaga__inaga" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FaInstagram /></a>
         </div>
 
-        {/* スマホ用ハンバーガーボタン (md以下で表示) */}
+        {/* スマホ用ハンバーガーボタン */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden z-[110] relative w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none"
+          className="md:hidden z-[110] fixed top-6 right-6 w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none"
         >
           <motion.span 
             animate={isOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
@@ -123,20 +123,20 @@ export default function Home() {
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, x: "100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: "100%" }}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-0 bg-white z-[105] flex flex-col items-center justify-center"
+              className="fixed inset-0 bg-white/40 backdrop-blur-xl z-[105] flex flex-col items-center justify-center"
             >
-              <nav className="flex flex-col items-center gap-10 text-[24pt] font-['Bahnschrift'] tracking-widest">
+              <nav className="flex flex-col items-center gap-10 text-[18pt] font-['Bahnschrift'] tracking-widest">
                 <a href="#about" onClick={() => setIsOpen(false)}>ABOUT</a>
                 <a href="#works" onClick={() => setIsOpen(false)}>WORKS</a>
                 <a href="#news" onClick={() => setIsOpen(false)}>NEWS</a>
                 <a href="#contact" onClick={() => setIsOpen(false)}>CONTACT</a>
               </nav>
               
-              <div className="flex gap-8 text-[32px] mt-16">
+              <div className="flex gap-8 text-[28px] mt-16">
                 <a href="https://x.com/inaga_P" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
                 <a href="https://soundcloud.com/sgextgl4iyy9" target="_blank" rel="noopener noreferrer"><FaSoundcloud /></a>
                 <a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
@@ -147,14 +147,16 @@ export default function Home() {
         </AnimatePresence>
       </header>
 
-      <div className="relative z-10 pt-20">
+      <div className="relative z-10">
         
         {/*ファーストビューfirst view*/}
-        <main className="h-[calc(100vh-80px)] w-full flex flex-col justify-center items-center">
+        {/* 🟢 justify-start でスマホ時は上寄せ。md以上は md:justify-center で中央。 */}
+        <main className="min-h-screen md:h-[calc(100vh-80px)] w-full flex flex-col justify-start md:justify-center items-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, ease: "easeOut" }} className="w-full text-center">
-            {/* ロゴのPC・スマホ切り替え */}
-            <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover mb-6" />
-            <img src="/images/top_logo_nocut.png" alt="inaga" className="block md:hidden w-full h-auto object-contain mb-6" />
+            {/* スマホ用ロゴ: top_logo_smartphone.png */}
+            <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-contain" />
+            {/* PC用ロゴ: top_logo.png */}
+            <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover" />
           </motion.div>
         </main>
 
@@ -173,7 +175,6 @@ export default function Home() {
           >
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest">ABOUT</h2>
             <div className="space-y-6 leading-relaxed font-['Mobo'] font-normal text-[12.2pt]">
-              {/* 🟢 「いなが」の上下余白（mt, mb）と行間（leading）を調整しました */}
               <p className="text-[32pt] md:text-[45.7pt] font-['Mobo-bold'] leading-tight mt-10 mb-12">いなが</p>
               <p>2004年11月24日生まれの21歳。札幌在住。</p>
               <p>音楽やグラフィックデザインを制作。</p>
@@ -190,11 +191,9 @@ export default function Home() {
             {/*ミュージックMUSIC*/}
             <div className="mb-20">
               <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2">MUSIC</h3>
-              {/*横スクロール維持：snap-xでピタッと止まるように設定*/}
               <div className="flex overflow-x-auto gap-10 pb-12 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {musicWorks.map((work) => (
                   <div key={`music-${work.id}`} className="group flex flex-col gap-4 snap-start shrink-0">
-                    {/*画像の高さ指定はここでする。現在は(h-[300px])で固定。影を最大級(shadow-2xl)に設定*/}
                     <div className="relative rounded-lg shadow-2xl border border-[#333333]/5 bg-white overflow-hidden h-[300px]">
                       <img 
                         src={`/images/MUSIC WORKS/${work.filename}`} 
@@ -202,10 +201,9 @@ export default function Home() {
                         className="h-full w-auto object-contain transition-transform duration-500 group-hover:scale-105" 
                       />
                     </div>
-                    {/*画像の下に配置するタイトルとSNSアイコン*/}
                     <div className="font-['Mobo'] px-1">
+                      {/* 🟢 Moboフォントを適用 */}
                       <p className="font-['Mobo'] text-[12.2pt] mb-3">{work.title}</p>
-                      {/*サウンドクラウドとYouTubeのアイコンを順に並べる*/}
                       <div className="flex gap-6 text-[28px] text-[#333333] mt-3">
                         <a href={work.soundcloud} target="_blank" rel="noopener noreferrer" className="transition-transform duration-300 hover:scale-110 inline-block">
                           <FaSoundcloud />
@@ -226,7 +224,6 @@ export default function Home() {
               <div className="flex overflow-x-auto gap-10 pb-12 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {designWorks.map((work) => (
                   <div key={`design-${work.id}`} className="group flex flex-col gap-4 snap-start shrink-0">
-                    {/*画像の高さ指定はここでする。現在は(h-[300px])で固定*/}
                     <div className="relative rounded-lg shadow-2xl border border-[#333333]/5 bg-white overflow-hidden h-[300px]">
                       <img 
                         src={`/images/DESIGN WORKS/${work.filename}`} 
@@ -235,6 +232,7 @@ export default function Home() {
                       />
                     </div>
                     <div className="font-['Mobo'] px-1">
+                      {/* 🟢 Moboフォントを適用 */}
                       <p className="font-['Mobo'] text-[12.2pt]">{work.title}</p>
                     </div>
                   </div>
@@ -269,7 +267,6 @@ export default function Home() {
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest">CONTACT</h2>
             
             <div className="flex flex-col gap-10">
-              {/*Mail*/}
               <motion.a 
                 href="mailto:inagainagainaga@gmail.com" 
                 initial="initial" 
@@ -281,7 +278,7 @@ export default function Home() {
                   variants={{ initial: { scale: 1 }, hover: { scale: 1.05 } }}
                   transition={{ duration: 0.2 }}
                 >
-                  <FaRegEnvelope className="text-[15pt] md:text-[18pt]" />
+                  <FaRegEnvelope className="text-[20pt] md:text-[24pt]" />
                   <span className="font-['Bahnschrift'] tracking-tight">
                     inagainagainaga@gmail.com
                   </span>
@@ -293,7 +290,6 @@ export default function Home() {
                 />
               </motion.a>
 
-              {/*X*/}
               <motion.a 
                 href="https://x.com/inaga_P" 
                 target="_blank" 
@@ -307,7 +303,7 @@ export default function Home() {
                   variants={{ initial: { scale: 1 }, hover: { scale: 1.05 } }}
                   transition={{ duration: 0.2 }}
                 >
-                  <FaXTwitter className="text-[15pt] md:text-[18pt]" />
+                  <FaXTwitter className="text-[20pt] md:text-[24pt]" />
                   <span className="font-['Bahnschrift'] tracking-tight">
                     @inaga_P
                   </span>
