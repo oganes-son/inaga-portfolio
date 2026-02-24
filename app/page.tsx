@@ -6,11 +6,11 @@ import { musicWorks, designWorks, newsData } from "@/lib/works";
 import { VisualizerStyle2 } from '@/components/VisualizerStyle2';
 
 /* ================================================================
-  1. デザイン共通パーツ
+  1. デザイン共通パーツ（リンク・ナビゲーション等）
   ================================================================
 */
 
-// ヘッダー・メニュー用リンク（下線 h-[2px] 統一）
+// ナビゲーション用リンク
 function AnimatedLink({ href, text, onClick }: { href: string; text: string; onClick?: () => void }) {
   return (
     <motion.a 
@@ -23,7 +23,7 @@ function AnimatedLink({ href, text, onClick }: { href: string; text: string; onC
   );
 }
 
-// CONTACTリンク：下線 h-[2px] ＋ アイコンホバー scale 1.1 統一
+// CONTACTセクション用リンク
 function ContactLink({ href, icon, text }: { href: string; icon: any; text: string }) {
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-6 text-[#333333] w-fit">
@@ -41,7 +41,7 @@ function ContactLink({ href, icon, text }: { href: string; icon: any; text: stri
 }
 
 /* ================================================================
-  2. WORKSギャラリー（SNSアイコンホバー scale 1.1 統一）
+  2. WORKSギャラリーコンポーネント
   ================================================================
 */
 
@@ -96,7 +96,7 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
 }
 
 /* ================================================================
-  3. メインコンテンツ
+  3. メインページ本体
   ================================================================
 */
 
@@ -114,9 +114,23 @@ export default function Home() {
       
       {/* 🟢 ヘッダー */}
       <header className="fixed top-0 left-0 w-full h-20 z-[100] flex items-center justify-between px-6 md:px-10 overflow-hidden">
-        <motion.div animate={{ opacity: showHeaderBg ? 1 : 0 }} className="absolute inset-0 z-[-2]" style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }} />
-        <motion.div animate={{ opacity: showHeaderBg ? 0.7 : 0 }} className="absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm" />
+        
+        {/* 【修正】スマホでは背景画像を非表示 (hidden md:block) */}
+        <motion.div
+          animate={{ opacity: showHeaderBg ? 1 : 0 }}
+          transition={{ duration: 0.5 }}
+          className="hidden md:block absolute inset-0 z-[-2]"
+          style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }}
+        />
 
+        {/* 【修正】スマホでは白いオーバーレイを非表示 (hidden md:block) */}
+        <motion.div
+          animate={{ opacity: showHeaderBg ? 0.7 : 0 }}
+          transition={{ duration: 0.5 }}
+          className="hidden md:block absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm"
+        />
+
+        {/* ナビゲーション（PC用） */}
         <nav className="hidden md:flex gap-8 items-center h-full">
           <AnimatedLink href="#about" text="ABOUT" />
           <AnimatedLink href="#works" text="WORKS" />
@@ -124,7 +138,7 @@ export default function Home() {
           <AnimatedLink href="#contact" text="CONTACT" />
         </nav>
 
-        {/* SNSアイコン（ホバー挙動統一） */}
+        {/* SNSアイコン（PC用） */}
         <div className="hidden md:flex gap-10 text-[28px] items-center h-full">
           <motion.a href="https://x.com/inaga_P" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaXTwitter /></motion.a>
           <motion.a href="https://soundcloud.com/sgextgl4iyy9" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaSoundcloud /></motion.a>
@@ -132,27 +146,23 @@ export default function Home() {
           <motion.a href="https://www.instagram.com/inaga__inaga" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaInstagram /></motion.a>
         </div>
 
+        {/* スマホ用ハンバーガーボタン */}
         <button onClick={() => setIsOpen(!isOpen)} className="md:hidden z-[110] fixed top-6 right-6 w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none">
           <motion.span animate={isOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }} className="w-8 h-0.5 bg-[#333333] block" />
           <motion.span animate={isOpen ? { opacity: 0 } : { opacity: 1 }} className="w-8 h-0.5 bg-[#333333] block" />
           <motion.span animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }} className="w-8 h-0.5 bg-[#333333] block" />
         </button>
 
-        {/* 🟢 スマホメニュー：もやもや半透明 ＋ SNSアイコン復活 */}
+        {/* スマホメニュー：半透明ぼかし背景 ＋ SNSアイコン */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div 
-              initial={{ opacity: 0, x: "100%" }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: "100%" }} 
-              transition={{ type: "spring", damping: 30, stiffness: 300 }} 
-              className="fixed inset-0 bg-white/40 backdrop-blur-3xl z-[105] flex flex-col items-center justify-center gap-16"
-            >
+            <motion.div initial={{ opacity: 0, x: "100%" }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }} className="fixed inset-0 bg-white/40 backdrop-blur-3xl z-[105] flex flex-col items-center justify-center gap-16">
               <nav className="flex flex-col items-center gap-10 text-[18pt] font-['Bahnschrift'] tracking-widest text-[#333333]">
                 <AnimatedLink href="#about" text="ABOUT" onClick={() => setIsOpen(false)} />
                 <AnimatedLink href="#works" text="WORKS" onClick={() => setIsOpen(false)} />
                 <AnimatedLink href="#news" text="NEWS" onClick={() => setIsOpen(false)} />
                 <AnimatedLink href="#contact" text="CONTACT" onClick={() => setIsOpen(false)} />
               </nav>
-
               <div className="flex gap-10 text-[32px] text-[#333333]/80">
                 <motion.a href="https://x.com/inaga_P" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer"><FaXTwitter /></motion.a>
                 <motion.a href="https://soundcloud.com/sgextgl4iyy9" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer"><FaSoundcloud /></motion.a>
@@ -165,6 +175,7 @@ export default function Home() {
       </header>
 
       <div className="relative z-10">
+        
         <main className="min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full flex items-center justify-center">
             <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
@@ -184,7 +195,6 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* 🟢 ビジュアライザー ＋ SoundCloud */}
         <section className="w-full pb-[60px]">
           <div className="max-w-4xl mx-auto px-6 mb-12">
             <iframe width="100%" height="166" scrolling="no" frameBorder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2267409518&color=%23333333&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
@@ -230,44 +240,35 @@ export default function Home() {
             <ContactLink href="https://x.com/inaga_P" icon={<FaXTwitter />} text="@inaga_P" />
           </div>
         </section>
+
       </div>
 
-      {/* 🟢 フッター（復活 ＋ OGANESSON隠れリンク修正） 🟢 */}
       <footer className="bg-[#333333] text-white py-24 flex flex-col items-center gap-10">
         <nav className="flex flex-wrap justify-center gap-8 text-[12.2pt]">
-          {/* フッター用の AnimatedLink 代替（白文字固定） */}
-          <motion.a href="#about" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1">
+          <motion.a href="#about" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             ABOUT
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 left-0 w-full h-[2px] bg-white origin-center" />
+            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
           </motion.a>
-          <motion.a href="#works" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1">
+          <motion.a href="#works" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             WORKS
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 left-0 w-full h-[2px] bg-white origin-center" />
+            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
           </motion.a>
-          <motion.a href="#news" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1">
+          <motion.a href="#news" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             NEWS
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 left-0 w-full h-[2px] bg-white origin-center" />
+            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
           </motion.a>
-          <motion.a href="#contact" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1">
+          <motion.a href="#contact" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             CONTACT
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 left-0 w-full h-[2px] bg-white origin-center" />
+            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
           </motion.a>
         </nav>
-
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
           © 2026 INAGA | DEVELOPED BY{" "}
-          <a 
-            href="https://github.com/oganes-son/inaga-portfolio" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            /* 下線なし (no-underline) ＋ ホバーで不透明度アップ */
-            className="no-underline hover:opacity-100 transition-opacity"
-          >
+          <a href="https://github.com/oganes-son/inaga-portfolio" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
             OGANESSON
           </a>
         </div>
-
-        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none">
+        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none" title="BACK TO TOP">
           <img src={encodeURI("/images/footer_logo.png")} alt="BACK TO TOP" className="max-w-[200px] w-full px-6 opacity-60" />
         </button>
       </footer>
