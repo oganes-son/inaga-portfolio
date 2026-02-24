@@ -244,7 +244,7 @@ export default function Home() {
       </div>
 
       <footer className="bg-[#333333] text-white py-24 flex flex-col items-center gap-10">
-        <nav className="flex flex-wrap justify-center gap-8 text-[12.2pt]">
+        <nav className="flex flex-wrap justify-center gap-8 text-[10pt]">
           <motion.a href="#about" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             ABOUT
             <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
@@ -264,7 +264,7 @@ export default function Home() {
         </nav>
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
           © 2026 INAGA | DEVELOPED BY{" "}
-          <a href="https://github.com/oganes-son/inaga-portfolio" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
+          <a href="https://github.com/oganes-son" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
             OGANESSON
           </a>
         </div>
