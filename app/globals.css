@@ -18,7 +18,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* app/globals.css に追加するコード */
 @font-face {
   font-family: 'Mobo';
   src: url('/fonts/MOBO-Regular.otf') format('opentype');
@@ -33,4 +32,19 @@ body {
   font-weight: normal;
   font-style: normal;
   font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bahnschrift';
+  src: url('/fonts/bahnschrift.ttf') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@keyframes wave-slow {
+  0% { transform: translateX(-50%) skew(0deg); }
+  100% { transform: translateX(-50%) skew(20deg); }
+}
+.animate-wave-slow {
+  animation: wave-slow 8s ease-in-out infinite alternate;
 }

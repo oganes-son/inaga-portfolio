@@ -1,21 +1,19 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { motion, useScroll, useTransform, AnimatePresence, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, AnimatePresence, useMotionValueEvent } from "framer-motion";
 import { FaXTwitter, FaSoundcloud, FaYoutube, FaInstagram, FaRegEnvelope } from "react-icons/fa6";
-/* 🟢 lib/works.ts からデータをインポート */
 import { musicWorks, designWorks, newsData } from "@/lib/works"; 
+import { VisualizerStyle2 } from '@/components/VisualizerStyle2';
 
 /* ================================================================
-  1. デザイン調整用コンポーネント
+  1. 共通パーツ：ナビゲーション・リンク
   ================================================================
 */
 
 function AnimatedLink({ href, text, onClick }: { href: string; text: string; onClick?: () => void }) {
   return (
     <motion.a 
-      href={href} 
-      onClick={onClick}
-      initial="initial" whileHover="hover" 
+      href={href} onClick={onClick} initial="initial" whileHover="hover" 
       className="relative group text-[#333333] font-['Bahnschrift'] text-[12.2pt] tracking-widest px-2 py-1 flex flex-col items-center cursor-pointer"
     >
       <motion.span variants={{ initial: { scale: 1 }, hover: { scale: 1.1 } }}>{text}</motion.span>
@@ -35,22 +33,22 @@ function FooterAnimatedLink({ href, text }: { href: string; text: string }) {
 
 function ContactLink({ href, icon, text }: { href: string; icon: any; text: string }) {
   return (
-    <motion.a 
-      href={href} target="_blank" rel="noopener noreferrer"
-      initial="initial" whileHover="hover" 
-      className="relative group flex items-center gap-6 text-[12pt] md:text-[14pt] text-[#333333] w-fit"
-    >
-      <motion.div className="flex items-center gap-6" variants={{ initial: { scale: 1 }, hover: { scale: 1.05 } }} transition={{ duration: 0.2 }}>
-        <span className="text-[16pt] md:text-[20pt]">{icon}</span>
-        <span className="font-['Bahnschrift'] tracking-widest">{text}</span>
+    <a href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-6 text-[#333333] w-fit">
+      <motion.span whileHover={{ scale: 1.1 }} className="text-[16pt] md:text-[20pt] shrink-0 group-hover:text-[#333333]/60 transition-colors">
+        {icon}
+      </motion.span>
+      <motion.div initial="initial" whileHover="hover" className="relative flex flex-col">
+        <motion.span variants={{ initial: { scale: 1 }, hover: { scale: 1.05 } }} transition={{ duration: 0.2 }} className="font-['Bahnschrift'] tracking-normal text-[12pt] md:text-[14pt]">
+          {text}
+        </motion.span>
+        <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[1px] bg-[#333333] origin-center" />
       </motion.div>
-      <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[1px] bg-[#333333] origin-center" />
-    </motion.a>
+    </a>
   );
 }
 
 /* ================================================================
-  2. WORKSギャラリー
+  2. WORKSギャラリー（VIEW ALL復活 ＋ アイコン間隔修正）
   ================================================================
 */
 
@@ -69,24 +67,26 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
 
   return (
     <div className="relative group">
-      <div className={`absolute left-0 top-0 bottom-0 w-24 z-20 pointer-events-none transition-opacity duration-500 bg-gradient-to-r from-[#f4f7f6] to-transparent ${scrollState.left ? 'opacity-100' : 'opacity-0'}`} />
-      <div className={`absolute right-0 top-0 bottom-0 w-24 z-20 pointer-events-none transition-opacity duration-500 bg-gradient-to-l from-[#f4f7f6] to-transparent ${scrollState.right ? 'opacity-100' : 'opacity-0'}`} />
-
-      <div ref={scrollRef} onScroll={handleScroll} className="flex overflow-x-auto gap-10 pb-16 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className={`absolute left-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-r from-white to-transparent ${scrollState.left ? 'opacity-100' : 'opacity-0'}`} />
+      <div className={`absolute right-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-l from-white to-transparent ${scrollState.right ? 'opacity-100' : 'opacity-0'}`} />
+      
+      <div ref={scrollRef} onScroll={handleScroll} className="flex flex-nowrap overflow-x-auto gap-8 md:gap-12 pb-16 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {items.map((work) => (
-          <motion.div key={work.id} className="group/item flex flex-col items-center gap-4 snap-start shrink-0">
-            <a href={`/work-slug/${work.slug}`} className="block w-full">
-              <div className="relative rounded-none shadow-2xl border border-[#333333]/5 bg-white overflow-hidden h-[300px]">
-                <img src={encodeURI(`/images/${type.toUpperCase()} WORKS/${work.filename}`)} alt={work.title} className="h-full w-auto mx-auto object-contain transition-transform duration-500 group-hover/item:scale-105" />
+          <motion.div key={work.id} className="group/item flex flex-col items-center gap-4 snap-start shrink-0 basis-auto w-auto">
+            <a href={`/work-slug/${work.slug}`} className="block">
+              <div className="relative shadow-2xl bg-white border border-[#333333]/5 overflow-hidden h-[220px] md:h-[300px] w-auto">
+                <img src={encodeURI(`/images/${type.toUpperCase()} WORKS/${work.filename}`)} alt={work.title} className="h-full w-auto object-cover transition-transform duration-500 group-hover/item:scale-105" />
               </div>
-              <div className="font-['Mobo'] px-1 mt-4 text-center">
-                <p className="text-[12.2pt] hover:opacity-60 transition-opacity leading-relaxed">{work.title}</p>
+              <div className="font-['Mobo'] px-1 mt-6 text-center">
+                <p className="text-[11pt] md:text-[12.2pt] hover:opacity-60 transition-opacity leading-relaxed tracking-wider mb-4">{work.title}</p>
               </div>
             </a>
+            
+            {/* MUSIC作品のみSNSアイコンを表示（間隔 gap-6） */}
             {type === 'music' && (
-              <div className="flex justify-center gap-6 text-[28px] text-[#333333] px-1 w-full">
-                <a href={work.soundcloud} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform inline-block"><FaSoundcloud /></a>
-                <a href={work.youtube} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform inline-block"><FaYoutube /></a>
+              <div className="flex justify-center gap-6 text-[22px] md:text-[26px] opacity-70">
+                <motion.a href={work.soundcloud} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff3300] transition-colors"><FaSoundcloud /></motion.a>
+                <motion.a href={work.youtube} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff0000] transition-colors"><FaYoutube /></motion.a>
               </div>
             )}
           </motion.div>
@@ -94,7 +94,7 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
       </div>
 
       <motion.a href={`/work-type/${type}`} className="absolute -bottom-2 right-0 z-30 group flex flex-col items-end">
-        <div className="flex items-center gap-2 font-['Bahnschrift'] text-[9.5pt] tracking-[0.2em] text-[#333333]/60 group-hover:text-[#333333] transition-colors duration-300">
+        <div className="flex items-center gap-2 font-['Bahnschrift'] text-[9.5pt] tracking-[0.2em] text-[#333333]/60 group-hover:text-[#333333] transition-colors duration-300 uppercase">
           VIEW ALL <span className="text-[12pt] mb-0.5">→</span>
         </div>
         <motion.div className="h-[1px] bg-[#333333] w-full origin-right" initial={{ scaleX: 0 }} whileHover={{ scaleX: 1 }} transition={{ duration: 0.3 }} />
@@ -117,27 +117,13 @@ export default function Home() {
     setShowHeaderBg(latest > 300);
   });
 
-  useEffect(() => {
-    const handleResize = () => { if (window.innerWidth >= 768) setIsOpen(false); };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#f4f7f6] text-[#333333] relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#ffffff] text-[#333333] relative overflow-x-hidden">
       
+      {/* 🟢 ヘッダー */}
       <header className="fixed top-0 left-0 w-full h-20 z-[100] flex items-center justify-between px-6 md:px-10 overflow-hidden">
-        <motion.div
-          animate={{ opacity: showHeaderBg ? 1 : 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute inset-0 z-[-2]"
-          style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }}
-        />
-        <motion.div
-          animate={{ opacity: showHeaderBg ? 0.7 : 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm"
-        />
+        <motion.div animate={{ opacity: showHeaderBg ? 1 : 0 }} className="absolute inset-0 z-[-2]" style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }} />
+        <motion.div animate={{ opacity: showHeaderBg ? 0.7 : 0 }} className="absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm" />
 
         <nav className="hidden md:flex gap-8 items-center h-full">
           <AnimatedLink href="#about" text="ABOUT" />
@@ -147,24 +133,28 @@ export default function Home() {
         </nav>
 
         <div className="hidden md:flex gap-10 text-[28px] items-center h-full">
-          <a href="https://x.com/inaga_P" target="_blank" rel="noopener noreferrer" className="p-1 hover:scale-110 transition-transform flex items-center justify-center"><FaXTwitter /></a>
-          <a href="https://soundcloud.com/sgextgl4iyy9" target="_blank" rel="noopener noreferrer" className="p-1 hover:scale-110 transition-transform flex items-center justify-center"><FaSoundcloud /></a>
-          <a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" target="_blank" rel="noopener noreferrer" className="p-1 hover:scale-110 transition-transform flex items-center justify-center"><FaYoutube /></a>
-          <a href="https://www.instagram.com/inaga__inaga" target="_blank" rel="noopener noreferrer" className="p-1 hover:scale-110 transition-transform flex items-center justify-center"><FaInstagram /></a>
+          <motion.a href="https://x.com/inaga_P" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaXTwitter /></motion.a>
+          <motion.a href="https://soundcloud.com/sgextgl4iyy9" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaSoundcloud /></motion.a>
+          <motion.a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaYoutube /></motion.a>
+          <motion.a href="https://www.instagram.com/inaga__inaga" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaInstagram /></motion.a>
         </div>
 
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden z-[110] w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none">
+        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden z-[110] fixed top-6 right-6 w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none">
           <motion.span animate={isOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }} className="w-8 h-0.5 bg-[#333333] block" />
           <motion.span animate={isOpen ? { opacity: 0 } : { opacity: 1 }} className="w-8 h-0.5 bg-[#333333] block" />
           <motion.span animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }} className="w-8 h-0.5 bg-[#333333] block" />
         </button>
 
+        {/* 🟢 ハンバーガーメニュー：白いもやもや半透明 🟢 */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div
-              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-0 bg-white/40 backdrop-blur-xl z-[105] flex flex-col items-center justify-center"
+            <motion.div 
+              initial={{ opacity: 0, x: "100%" }} 
+              animate={{ opacity: 1, x: 0 }} 
+              exit={{ opacity: 0, x: "100%" }} 
+              transition={{ type: "spring", damping: 30, stiffness: 300 }} 
+              /* bg-white/40 (40%の白) ＋ backdrop-blur-3xl (強力なぼかし) で「もやもや」を表現 */
+              className="fixed inset-0 bg-white/40 backdrop-blur-3xl z-[105] flex flex-col items-center justify-center"
             >
               <nav className="flex flex-col items-center gap-10 text-[18pt] font-['Bahnschrift'] tracking-widest text-[#333333]">
                 <AnimatedLink href="#about" text="ABOUT" onClick={() => setIsOpen(false)} />
@@ -186,14 +176,11 @@ export default function Home() {
           </motion.div>
         </main>
 
-        {/* 🟢 ABOUT セクション */}
-        <section id="about" className="max-w-4xl mx-auto py-[60px] px-6 flex flex-col justify-center text-left">
+        {/* 🟢 ABOUT：正確なテキストを維持 */}
+        <section id="about" className="max-w-4xl mx-auto py-[60px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
-            <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest">ABOUT</h2>
-            
-            {/* 🟢 本文：文字間を tracking-[0.12em]（約1.2倍）に設定 */}
+            <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
             <div className="font-['Mobo'] text-[12.2pt] leading-[2.1] tracking-[0.12em]">
-              {/* 🟢 「いなが」：上下の余白を my-10 で完全に統一 */}
               <p className="text-[32pt] md:text-[45.7pt] font-['Mobo-bold'] leading-tight my-10 tracking-widest -ml-1 md:-ml-2">いなが</p>
               <p>2004年11月24日生まれの21歳。札幌在住。</p>
               <p>音楽やグラフィックデザインを制作。</p>
@@ -202,57 +189,50 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* 🟢 SoundCloud セクション（ABOUTとWORKSの間） */}
-        <section className="max-w-4xl mx-auto py-[30px] px-6">
-          <iframe 
-            width="100%" 
-            height="166" 
-            scrolling="no" 
-            frameBorder="no" 
-            allow="autoplay" 
-            src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1149723556&color=%23333333&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"
-          ></iframe>
+        {/* 🟢 ビジュアライザー ＋ SoundCloud */}
+        <section className="w-full pb-[60px]">
+          <div className="max-w-4xl mx-auto px-6 mb-12">
+            <iframe width="100%" height="166" scrolling="no" frameBorder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2267409518&color=%23333333&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
+          </div>
+          <VisualizerStyle2 />
         </section>
 
-        {/* 🟢 WORKS セクション */}
-        <section id="works" className="max-w-4xl mx-auto py-[60px] px-6 flex flex-col justify-center text-left">
-          <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest">WORKS</h2>
+        {/* 🟢 WORKS */}
+        <section id="works" className="max-w-4xl mx-auto py-[60px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+          <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest uppercase">WORKS</h2>
           <div className="mb-16">
-            <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2">MUSIC WORKS</h3>
+            <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2 uppercase">MUSIC</h3>
             <HorizontalScrollGallery items={musicWorks} type="music" />
           </div>
           <div>
-            <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2">DESIGN WORKS</h3>
+            <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2 uppercase">DESIGN</h3>
             <HorizontalScrollGallery items={designWorks} type="design" />
           </div>
         </section>
 
-        {/* 🟢 NEWS セクション */}
-        <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left">
-          <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest">NEWS</h2>
-          <div className="bg-white/50 rounded-2xl shadow-sm backdrop-blur-sm overflow-hidden">
-            <div className="max-h-[300px] overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-[#333333]/20">
+        {/* 🟢 NEWS */}
+        <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-24">
+          <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">NEWS</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-[#333333]/5 overflow-hidden">
+            <div className="max-h-[300px] overflow-y-auto p-8 space-y-6">
               {newsData.map((item, index) => (
                 <div key={index} className="flex flex-col md:flex-row md:gap-8 border-b border-[#333333]/10 pb-4 last:border-0 font-['Mobo']">
-                  <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[10pt]">{item.date}</span>
-                  <span className="text-[11pt] leading-relaxed">
-                    {item.link ? (
-                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="hover:opacity-50 underline underline-offset-4 transition-opacity">{item.content}</a>
-                    ) : (
-                      item.content
+                  <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[10pt] shrink-0">{item.date}</span>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[11pt] leading-relaxed tracking-wider">{item.content}</span>
+                    {item.link && (
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[9pt] font-['Bahnschrift'] tracking-widest opacity-50 hover:opacity-100 underline underline-offset-4 transition-opacity w-fit uppercase">Visit Link →</a>
                     )}
-                  </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* 🟢 CONTACT セクション
-            pb-[170px]：フッターとの間の余白を調整（256pxから約170pxへ）
-        */}
-        <section id="contact" className="max-w-4xl mx-auto pt-[60px] pb-[170px] px-6 min-h-[40vh] flex flex-col justify-center text-left">
-          <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest">CONTACT</h2>
+        {/* 🟢 CONTACT */}
+        <section id="contact" className="max-w-4xl mx-auto pt-[60px] pb-[170px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-24">
+          <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest uppercase">CONTACT</h2>
           <div className="flex flex-col gap-10">
             <ContactLink href="mailto:inagainagainaga@gmail.com" icon={<FaRegEnvelope />} text="inagainagainaga@gmail.com" />
             <ContactLink href="https://x.com/inaga_P" icon={<FaXTwitter />} text="@inaga_P" />
@@ -261,7 +241,7 @@ export default function Home() {
 
       </div>
 
-      {/* フッター */}
+      {/* 🟢 フッター */}
       <footer className="bg-[#333333] text-white py-24 flex flex-col items-center gap-10">
         <nav className="flex flex-wrap justify-center gap-8 text-[12.2pt]">
           <FooterAnimatedLink href="#about" text="ABOUT" />
