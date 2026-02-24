@@ -27,7 +27,6 @@ export const VisualizerStyle2 = () => {
   // 再生・一時停止の切り替え
   const togglePlay = () => {
     if (!audioRef.current) return;
-    // 初回再生時にAudioContextを初期化
     if (!isReady) initAudioContext();
     
     if (audioRef.current.paused) {
@@ -48,13 +47,12 @@ export const VisualizerStyle2 = () => {
     setCurrentTime(newTime);
   };
 
-  // 🟢 曲の秒数取得ロジックの強化（0:00問題を解決）
+  // 曲の秒数取得ロジック（0:00問題を解決）
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const updateDuration = () => {
-      // Infinity や NaN ではない有効な数値が取れた時だけセット
       if (audio.duration && isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
@@ -62,13 +60,11 @@ export const VisualizerStyle2 = () => {
 
     const updateTime = () => setCurrentTime(audio.currentTime);
 
-    // 複数のイベントで監視して確実に取得
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('durationchange', updateDuration);
     audio.addEventListener('canplay', updateDuration);
     audio.addEventListener('timeupdate', updateTime);
 
-    // 既に読み込みが終わっている場合のフォールバック
     if (audio.readyState >= 1) updateDuration();
 
     return () => {
@@ -104,7 +100,6 @@ export const VisualizerStyle2 = () => {
       for (let i = 0; i < activeBuffer; i++) {
         const x = (i / activeBuffer) * canvas.width;
         const intensity = dataArray[i] / 255;
-        // 音がある時だけ揺れるように制御
         const y = canvas.height - (intensity * canvas.height * 0.5) 
                   - (layer * 40) + (intensity > 0.01 ? Math.sin(i * 0.1 + Date.now() * 0.002 + layer) * 50 * intensity : 0);
 
@@ -132,42 +127,49 @@ export const VisualizerStyle2 = () => {
   }, [isPlaying, isReady]);
 
   return (
-    <div className="relative w-full h-[450px] bg-white overflow-hidden flex items-center justify-center">
+    /* 🟢 【修正】スマホでは min-h-[600px] で余白を確保し、PCでは h-[500px] で固定 */
+    <div className="relative w-full min-h-[600px] md:h-[500px] bg-white overflow-hidden flex items-center justify-center py-12 md:py-0">
       <audio ref={audioRef} src="/music/Purify.mp3" loop crossOrigin="anonymous" />
       <canvas ref={canvasRef} className="absolute inset-0 z-0 w-full h-full mix-blend-multiply pointer-events-none" />
 
-      {/* コンテンツエリア：max-w-4xl で他のセクションと幅を統一 */}
+      {/* コンテンツエリア */}
       <div className="relative z-10 w-full max-w-4xl px-6 flex flex-col md:flex-row items-center gap-12 pointer-events-none">
         
-        {/* 左側：アートワーク（完全に正方形を維持） */}
+        {/* 左側：アートワーク（PCは従来通り画像ホバーで再生可能） */}
         <div className="relative shrink-0 w-[240px] h-[240px] md:w-[280px] md:h-[280px] shadow-2xl bg-white pointer-events-auto group">
           <img src="/images/MUSIC WORKS/Purify.png" alt="Purify" className="w-full h-full object-cover" />
-          <button onClick={togglePlay} className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* 🟢 PC用再生ボタン：md:flex でPCのみ表示 */}
+          <button onClick={togglePlay} className="hidden md:flex absolute inset-0 items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
             {isPlaying ? <FaPause className="text-white text-5xl" /> : <FaPlay className="text-white text-5xl ml-2" />}
           </button>
         </div>
 
         {/* 右側：テキスト情報エリア */}
-        <div className="flex flex-col text-[#333333] w-full pointer-events-auto items-start">
-          <h2 className="text-[15pt] md:text-[24pt] font-['Mobo-bold'] leading-tight tracking-wider mb-2">Purify</h2>
-          <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-10 uppercase">Music / Album Design</p>
+        <div className="flex flex-col text-[#333333] w-full pointer-events-auto items-center md:items-start">
+          <h2 className="text-[18pt] md:text-[24pt] font-['Mobo-bold'] leading-tight tracking-wider mb-2">Purify</h2>
+          <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-10 uppercase">INAGA</p>
           
-          {/* 🟢 シークバー：左端をタイトルに揃えるためのレイアウト修正 */}
+          {/* シークバー */}
           <div className="w-full max-w-md mb-8 flex flex-col gap-2">
             <input 
               type="range" min="0" max={duration > 0 ? duration : 100} value={currentTime} onChange={handleSeek}
-              /* appearance-none で標準スタイルを解除 */
               className="w-full h-[2px] bg-[#333333]/10 appearance-none cursor-pointer accent-[#333333]" 
               style={{ background: `linear-gradient(to right, #333333 ${(currentTime / (duration || 1)) * 100}%, #eee ${(currentTime / (duration || 1)) * 100}%)` }} 
             />
-            {/* 時間表示：バーの真下に配置して左端を揃える */}
             <div className="flex justify-between font-['Bahnschrift'] text-[9pt] opacity-40">
               <span>{formatTime(currentTime)}</span>
               <span>{formatTime(duration)}</span>
             </div>
           </div>
 
-          {/* 🟢 SNSアイコン：間隔を gap-6 に修正（WORKSギャラリーと統一） */}
+          {/* 🟢 【スマホ専用再生ボタン】md:hidden でPCでは非表示、中央揃え */}
+          <div className="md:hidden flex justify-center w-full mb-10">
+            <button onClick={togglePlay} className="text-[32pt] text-[#333333] active:scale-90 transition-transform">
+              {isPlaying ? <FaPause /> : <FaPlay className="ml-2" />}
+            </button>
+          </div>
+
+          {/* SNSアイコン：間隔 gap-6 */}
           <div className="flex gap-6 text-[26px] opacity-70 mt-2">
             <motion.a href="#" whileHover={{ scale: 1.1 }} className="hover:text-[#ff3300] transition-colors"><FaSoundcloud /></motion.a>
             <motion.a href="#" whileHover={{ scale: 1.1 }} className="hover:text-[#ff0000] transition-colors"><FaYoutube /></motion.a>
