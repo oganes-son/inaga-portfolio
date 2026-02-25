@@ -156,7 +156,7 @@ export default function Home() {
         <section id="about" className="max-w-4xl mx-auto pt-[40px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
-            <div className="font-['Mobo'] text-[9pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em]">
+            <div className="font-['Mobo'] text-[9.5pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em]">
               <p className="text-[32pt] md:text-[45.7pt] font-['Mobo-bold'] leading-tight my-10 tracking-widest -ml-1 md:-ml-2">いなが</p>
               <p>2004年11月24日生まれの21歳。札幌在住。</p>
               <p>音楽やグラフィックデザインを制作。</p>
@@ -190,9 +190,9 @@ export default function Home() {
             <div className="max-h-[300px] overflow-y-auto p-8 space-y-6">
               {newsData.map((item, index) => (
                 <div key={index} className="flex flex-col md:flex-row md:gap-8 border-b border-[#333333]/10 pb-4 last:border-0 font-['Mobo']">
-                  <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[10pt] shrink-0">{item.date}</span>
+                  <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[9.5pt] md:text-[10pt] shrink-0">{item.date}</span>
                   <div className="flex flex-col gap-2">
-                    <span className="text-[11pt] leading-relaxed tracking-wider">{item.content}</span>
+                    <span className="text-[9.5pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em tracking-wider">{item.content}</span>
                     {item.link && (
                       <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[9pt] font-['Bahnschrift'] tracking-widest opacity-50 hover:opacity-100 underline underline-offset-4 transition-opacity w-fit uppercase">Visit Link →</a>
                     )}
@@ -216,7 +216,7 @@ export default function Home() {
 
       {/* フッター */}
       <footer className="bg-[#333333] text-white py-24 flex flex-col items-center gap-10">
-        <nav className="flex flex-wrap justify-center gap-8 text-[12.2pt]">
+        <nav className="flex flex-wrap justify-center gap-8 text-[10pt] md:text-[12.2pt]">
           <motion.a href="#about" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             ABOUT
             <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />

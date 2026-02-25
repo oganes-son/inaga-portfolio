@@ -57,7 +57,7 @@ export type News = {
 
 export const newsData: News[] = [
   { 
-    date: "2026.02.25", 
+    date: "2026.02.2", 
     content: "ポートフォリオサイトを公開しました。" 
   }
 ];
