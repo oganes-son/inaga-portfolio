@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   template: "%s | inaga", 
   },
   description: "Portfolio of Composer/Designer inaga",
+  icons: {
+    icon: "/images/favicon.ico",
+  }
 };
 
 export default function RootLayout({
