@@ -76,55 +76,55 @@ export const VisualizerStyle2 = () => {
   }, []);
 
   // 背景波形の描画（Style 02: Spectrum Aurora）
-  const render = () => {
-    if (!canvasRef.current || !analyser) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  // const render = () => {
+  //   if (!canvasRef.current || !analyser) return;
+  //   const canvas = canvasRef.current;
+  //   const ctx = canvas.getContext('2d');
+  //   if (!ctx) return;
 
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+  //   canvas.width = canvas.offsetWidth;
+  //   canvas.height = canvas.offsetHeight;
     
-    analyser.fftSize = 512;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    analyser.getByteFrequencyData(dataArray);
+  //   analyser.fftSize = 512;
+  //   const bufferLength = analyser.frequencyBinCount;
+  //   const dataArray = new Uint8Array(bufferLength);
+  //   analyser.getByteFrequencyData(dataArray);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let layer = 0; layer < 3; layer++) {
-      ctx.beginPath();
-      ctx.moveTo(0, canvas.height);
-      const activeBuffer = bufferLength * 0.7; 
+  //   for (let layer = 0; layer < 3; layer++) {
+  //     ctx.beginPath();
+  //     ctx.moveTo(0, canvas.height);
+  //     const activeBuffer = bufferLength * 0.7; 
 
-      for (let i = 0; i < activeBuffer; i++) {
-        const x = (i / activeBuffer) * canvas.width;
-        const intensity = dataArray[i] / 255;
-        const y = canvas.height - (intensity * canvas.height * 0.5) 
-                  - (layer * 40) + (intensity > 0.01 ? Math.sin(i * 0.1 + Date.now() * 0.002 + layer) * 50 * intensity : 0);
+  //     for (let i = 0; i < activeBuffer; i++) {
+  //       const x = (i / activeBuffer) * canvas.width;
+  //       const intensity = dataArray[i] / 255;
+  //       const y = canvas.height - (intensity * canvas.height * 0.5) 
+  //                 - (layer * 40) + (intensity > 0.01 ? Math.sin(i * 0.1 + Date.now() * 0.002 + layer) * 50 * intensity : 0);
 
-        if (i === 0) ctx.lineTo(x, y);
-        else {
-          const prevX = ((i - 1) / activeBuffer) * canvas.width;
-          const prevInt = dataArray[i-1] / 255;
-          const prevY = canvas.height - (prevInt * canvas.height * 0.5) 
-                        - (layer * 40) + (prevInt > 0.01 ? Math.sin((i - 1) * 0.1 + Date.now() * 0.002 + layer) * 50 * prevInt : 0);
-          ctx.quadraticCurveTo(prevX, prevY, (prevX + x) / 2, (prevY + y) / 2);
-        }
-      }
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(51, 51, 51, ${0.04 - layer * 0.01})`;
-      ctx.fill();
-    }
-    animationRef.current = requestAnimationFrame(render);
-  };
+  //       if (i === 0) ctx.lineTo(x, y);
+  //       else {
+  //         const prevX = ((i - 1) / activeBuffer) * canvas.width;
+  //         const prevInt = dataArray[i-1] / 255;
+  //         const prevY = canvas.height - (prevInt * canvas.height * 0.5) 
+  //                       - (layer * 40) + (prevInt > 0.01 ? Math.sin((i - 1) * 0.1 + Date.now() * 0.002 + layer) * 50 * prevInt : 0);
+  //         ctx.quadraticCurveTo(prevX, prevY, (prevX + x) / 2, (prevY + y) / 2);
+  //       }
+  //     }
+  //     ctx.lineTo(canvas.width, canvas.height);
+  //     ctx.closePath();
+  //     ctx.fillStyle = `rgba(51, 51, 51, ${0.04 - layer * 0.01})`;
+  //     ctx.fill();
+  //   }
+  //   animationRef.current = requestAnimationFrame(render);
+  // };
 
-  useEffect(() => {
-    if (isPlaying && isReady) render();
-    else if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
-  }, [isPlaying, isReady]);
+  // useEffect(() => {
+  //   if (isPlaying && isReady) render();
+  //   else if (animationRef.current) cancelAnimationFrame(animationRef.current);
+  //   return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
+  // }, [isPlaying, isReady]);
 
   return (
     /* 🟢 【修正】スマホでは min-h-[600px] で余白を確保し、PCでは h-[500px] で固定 */

@@ -5,12 +5,9 @@ import { FaXTwitter, FaSoundcloud, FaYoutube, FaInstagram, FaRegEnvelope } from 
 import { musicWorks, designWorks, newsData } from "@/lib/works"; 
 import { VisualizerStyle2 } from '@/components/VisualizerStyle2';
 
-/* ================================================================
-  1. デザイン共通パーツ（リンク・ナビゲーション等）
-  ================================================================
-*/
+/* --- 共通パーツ (AnimatedLink, ContactLink, HorizontalScrollGalleryなどは以前のまま維持) --- */
+/* 省略：前回の回答のパーツ定義部分をそのまま使用してください */
 
-// ナビゲーション用リンク
 function AnimatedLink({ href, text, onClick }: { href: string; text: string; onClick?: () => void }) {
   return (
     <motion.a 
@@ -23,7 +20,6 @@ function AnimatedLink({ href, text, onClick }: { href: string; text: string; onC
   );
 }
 
-// CONTACTセクション用リンク
 function ContactLink({ href, icon, text }: { href: string; icon: any; text: string }) {
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-6 text-[#333333] w-fit">
@@ -40,15 +36,9 @@ function ContactLink({ href, icon, text }: { href: string; icon: any; text: stri
   );
 }
 
-/* ================================================================
-  2. WORKSギャラリーコンポーネント
-  ================================================================
-*/
-
 function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' | 'design' }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({ left: false, right: true });
-
   const handleScroll = () => {
     const el = scrollRef.current;
     if (el) {
@@ -57,12 +47,10 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
       setScrollState({ left: !isAtStart, right: !isAtEnd });
     }
   };
-
   return (
     <div className="relative group">
       <div className={`absolute left-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-r from-white to-transparent ${scrollState.left ? 'opacity-100' : 'opacity-0'}`} />
       <div className={`absolute right-0 top-0 bottom-0 w-16 z-20 pointer-events-none bg-gradient-to-l from-white to-transparent ${scrollState.right ? 'opacity-100' : 'opacity-0'}`} />
-      
       <div ref={scrollRef} onScroll={handleScroll} className="flex flex-nowrap overflow-x-auto gap-8 md:gap-12 pb-16 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {items.map((work) => (
           <motion.div key={work.id} className="group/item flex flex-col items-center gap-4 snap-start shrink-0 basis-auto w-auto">
@@ -74,7 +62,6 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
                 <p className="text-[11pt] md:text-[12.2pt] hover:opacity-60 transition-opacity leading-relaxed tracking-wider mb-4">{work.title}</p>
               </div>
             </a>
-            
             {type === 'music' && (
               <div className="flex justify-center gap-6 text-[22px] md:text-[26px] opacity-70">
                 <motion.a href={work.soundcloud} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff3300] transition-colors"><FaSoundcloud /></motion.a>
@@ -84,7 +71,6 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
           </motion.div>
         ))}
       </div>
-
       <motion.a href={`/work-type/${type}`} className="absolute -bottom-2 right-0 z-30 group flex flex-col items-end">
         <div className="flex items-center gap-2 font-['Bahnschrift'] text-[9.5pt] tracking-[0.2em] text-[#333333]/60 group-hover:text-[#333333] transition-colors duration-300 uppercase">
           VIEW ALL <span className="text-[12pt] mb-0.5">→</span>
@@ -94,11 +80,6 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
     </div>
   );
 }
-
-/* ================================================================
-  3. メインページ本体
-  ================================================================
-*/
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
@@ -112,48 +93,27 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#ffffff] text-[#333333] relative overflow-x-hidden">
       
-      {/* 🟢 ヘッダー */}
+      {/* ヘッダー */}
       <header className="fixed top-0 left-0 w-full h-20 z-[100] flex items-center justify-between px-6 md:px-10 overflow-hidden">
-        
-        {/* 【修正】スマホでは背景画像を非表示 (hidden md:block) */}
-        <motion.div
-          animate={{ opacity: showHeaderBg ? 1 : 0 }}
-          transition={{ duration: 0.5 }}
-          className="hidden md:block absolute inset-0 z-[-2]"
-          style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }}
-        />
-
-        {/* 【修正】スマホでは白いオーバーレイを非表示 (hidden md:block) */}
-        <motion.div
-          animate={{ opacity: showHeaderBg ? 0.7 : 0 }}
-          transition={{ duration: 0.5 }}
-          className="hidden md:block absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm"
-        />
-
-        {/* ナビゲーション（PC用） */}
+        <motion.div animate={{ opacity: showHeaderBg ? 1 : 0 }} className="hidden md:block absolute inset-0 z-[-2]" style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }} />
+        <motion.div animate={{ opacity: showHeaderBg ? 0.7 : 0 }} className="hidden md:block absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm" />
         <nav className="hidden md:flex gap-8 items-center h-full">
           <AnimatedLink href="#about" text="ABOUT" />
           <AnimatedLink href="#works" text="WORKS" />
           <AnimatedLink href="#news" text="NEWS" />
           <AnimatedLink href="#contact" text="CONTACT" />
         </nav>
-
-        {/* SNSアイコン（PC用） */}
         <div className="hidden md:flex gap-10 text-[28px] items-center h-full">
           <motion.a href="https://x.com/inaga_P" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaXTwitter /></motion.a>
           <motion.a href="https://soundcloud.com/sgextgl4iyy9" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaSoundcloud /></motion.a>
           <motion.a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaYoutube /></motion.a>
           <motion.a href="https://www.instagram.com/inaga__inaga" whileHover={{ scale: 1.1 }} target="_blank" rel="noopener noreferrer" className="p-1 transition-colors hover:text-[#333333]/60"><FaInstagram /></motion.a>
         </div>
-
-        {/* スマホ用ハンバーガーボタン */}
         <button onClick={() => setIsOpen(!isOpen)} className="md:hidden z-[110] fixed top-6 right-6 w-10 h-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none">
           <motion.span animate={isOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }} className="w-8 h-0.5 bg-[#333333] block" />
           <motion.span animate={isOpen ? { opacity: 0 } : { opacity: 1 }} className="w-8 h-0.5 bg-[#333333] block" />
           <motion.span animate={isOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }} className="w-8 h-0.5 bg-[#333333] block" />
         </button>
-
-        {/* スマホメニュー：半透明ぼかし背景 ＋ SNSアイコン */}
         <AnimatePresence>
           {isOpen && (
             <motion.div initial={{ opacity: 0, x: "100%" }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 300 }} className="fixed inset-0 bg-white/40 backdrop-blur-3xl z-[105] flex flex-col items-center justify-center gap-16">
@@ -176,6 +136,7 @@ export default function Home() {
 
       <div className="relative z-10">
         
+        {/* メインロゴ */}
         <main className="min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full flex items-center justify-center">
             <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
@@ -183,7 +144,8 @@ export default function Home() {
           </motion.div>
         </main>
 
-        <section id="about" className="max-w-4xl mx-auto py-[60px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+        {/* 🟢 ABOUT（余白を削減: ptのみ残しpbを小さく） */}
+        <section id="about" className="max-w-4xl mx-auto pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
             <div className="font-['Mobo'] text-[12.2pt] leading-[2.1] tracking-[0.12em]">
@@ -195,14 +157,13 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <section className="w-full pb-[60px]">
-          <div className="max-w-4xl mx-auto px-6 mb-12">
-            <iframe width="100%" height="166" scrolling="no" frameBorder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2267409518&color=%23333333&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe>
-          </div>
+        {/* 🟢 プレイヤーセクション（SoundCloudを削除し、上下余白を極小に） */}
+        <section className="w-full py-[10px]">
           <VisualizerStyle2 />
         </section>
 
-        <section id="works" className="max-w-4xl mx-auto py-[60px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+        {/* 🟢 WORKS（余白を削減: ptを小さく設定） */}
+        <section id="works" className="max-w-4xl mx-auto pt-[20px] pb-[60px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest uppercase">WORKS</h2>
           <div className="mb-16">
             <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2 uppercase">MUSIC</h3>
@@ -214,6 +175,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* NEWS */}
         <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">NEWS</h2>
           <div className="bg-white rounded-2xl shadow-sm border border-[#333333]/5 overflow-hidden">
@@ -233,6 +195,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* CONTACT */}
         <section id="contact" className="max-w-4xl mx-auto pt-[60px] pb-[170px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest uppercase">CONTACT</h2>
           <div className="flex flex-col gap-10">
@@ -243,8 +206,9 @@ export default function Home() {
 
       </div>
 
+      {/* フッター */}
       <footer className="bg-[#333333] text-white py-24 flex flex-col items-center gap-10">
-        <nav className="flex flex-wrap justify-center gap-8 text-[10pt]">
+        <nav className="flex flex-wrap justify-center gap-8 text-[12.2pt]">
           <motion.a href="#about" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
             ABOUT
             <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
@@ -264,7 +228,7 @@ export default function Home() {
         </nav>
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
           © 2026 INAGA | DEVELOPED BY{" "}
-          <a href="https://github.com/oganes-son" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
+          <a href="https://github.com/oganes-son/inaga-portfolio" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
             OGANESSON
           </a>
         </div>
