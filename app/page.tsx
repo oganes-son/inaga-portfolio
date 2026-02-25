@@ -156,7 +156,7 @@ export default function Home() {
         <section id="about" className="max-w-4xl mx-auto pt-[40px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
-            <div className="font-['Mobo'] text-[12.2pt] leading-[2.1] tracking-[0.12em]">
+            <div className="font-['Mobo'] text-[9pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em]">
               <p className="text-[32pt] md:text-[45.7pt] font-['Mobo-bold'] leading-tight my-10 tracking-widest -ml-1 md:-ml-2">いなが</p>
               <p>2004年11月24日生まれの21歳。札幌在住。</p>
               <p>音楽やグラフィックデザインを制作。</p>
