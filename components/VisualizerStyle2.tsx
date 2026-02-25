@@ -96,10 +96,10 @@ export const VisualizerStyle2 = () => {
           
           {/* 🟢 【修正】 md:-ml-[1.5px] を追加。PCサイトのみ微調整が適用されます */}
           <h2 className="text-[18pt] md:text-[24pt] font-['Mobo-bold'] leading-tight tracking-wider mb-2 md:-ml-[1.5px]">Purify</h2>
-          <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-10 uppercase">INAGA</p>
+          <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-6 md:mb-10 uppercase">INAGA</p>
           
           {/* シークバー： mb-6 (スマホ) / mb-8 (PC) に調整してボタンを上に */}
-          <div className="w-full max-w-md mb-4 md:mb-8 flex flex-col gap-2">
+          <div className="w-full max-w-md mb-0 md:mb-8 flex flex-col gap-2">
             <input 
               type="range" min="0" max={duration > 0 ? duration : 100} value={currentTime} onChange={handleSeek}
               className="w-full h-[2px] bg-[#333333]/10 appearance-none cursor-pointer accent-[#333333]" 
@@ -112,14 +112,14 @@ export const VisualizerStyle2 = () => {
           </div>
 
           {/* 🟢 【スマホ専用再生ボタン】 mb-6 (スマホ) に調整してアイコンを上に */}
-          <div className="md:hidden flex justify-center w-full mb-6">
+          <div className="md:hidden flex justify-center w-full mb-8">
             <button onClick={togglePlay} className="text-[32pt] text-[#333333] active:scale-90 transition-transform">
               {isPlaying ? <FaPause /> : <FaPlay className="ml-2" />}
             </button>
           </div>
 
           {/* SNSアイコン： mt-0 (スマホ) / mt-2 (PC) に調整 */}
-          <div className="flex gap-6 text-[26px] opacity-70 mt-0 md:mt-2">
+          <div className="flex gap-6 text-[26px] opacity-70 mt-2 md:mt-2">
             <motion.a href="https://soundcloud.com/sgextgl4iyy9" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff3300] transition-colors"><FaSoundcloud /></motion.a>
             <motion.a href="https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ" target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff0000] transition-colors"><FaYoutube /></motion.a>
           </div>
