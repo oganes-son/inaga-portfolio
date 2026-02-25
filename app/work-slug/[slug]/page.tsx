@@ -39,7 +39,7 @@ export default function WorkDetail() {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="flex flex-col">
             
             {/* 【タイトル】text-[28pt]〜 : サイズ / tracking-wider : 文字間隔 */}
-            <h1 className="text-[28pt] md:text-[34pt] font-['Mobo-bold'] leading-tight tracking-wider mb-4 uppercase">
+            <h1 className="text-[28pt] md:text-[34pt] font-['Mobo-bold'] leading-tight tracking-wider mb-4 -ml-[1.5px]">
               {work.title}
             </h1>
 
