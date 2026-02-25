@@ -47,6 +47,8 @@ export const designWorks: Work[] = [
   { id: 7, slug: "nengajo-2026", filename: "nengajo.png", title: "年賀状2026" , description: "" ,tools: ""},
 ];
 
+
+//ニュースnews追加してね
 export type News = {
   date: string;
   content: string;
@@ -55,12 +57,7 @@ export type News = {
 
 export const newsData: News[] = [
   { 
-    date: "2026.02.23", 
+    date: "2026.02.25", 
     content: "ポートフォリオサイトを公開しました。" 
-  },
-  {
-    date: "2026.03.01",
-    content: "新しくなんかおもろいもの作りました。",
-    link: "https://www.hokudai.ac.jp/"
   }
 ];
