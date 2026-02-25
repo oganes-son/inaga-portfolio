@@ -145,7 +145,7 @@ export default function Home() {
         </main>
 
         {/* 🟢 ABOUT（余白を削減: ptのみ残しpbを小さく） */}
-        <section id="about" className="max-w-4xl mx-auto pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+        <section id="about" className="max-w-4xl mx-auto pt-[30px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
             <div className="font-['Mobo'] text-[12.2pt] leading-[2.1] tracking-[0.12em]">
