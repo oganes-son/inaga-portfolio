@@ -236,7 +236,7 @@ export default function Home() {
         </nav>
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
           © 2026 INAGA | DEVELOPED BY{" "}
-          <a href="https://github.com/oganes-son/inaga-portfolio" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
+          <a href="https://github.com/oganes-son" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
             OGANESSON
           </a>
         </div>
