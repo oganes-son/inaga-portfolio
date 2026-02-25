@@ -135,17 +135,25 @@ export default function Home() {
       </header>
 
       <div className="relative z-10">
-        
-        {/* メインロゴ */}
-        <main className="min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
+
+        {/* 🟢 ファーストビュー：スマホでは高さ制限を解除 (h-auto) し、画像の高さなりに表示 */}
+        <main className="h-auto md:min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
           <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full flex items-center justify-center">
             <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
             <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover" />
           </motion.div>
         </main>
+        
+        {/* メインロゴ */}
+        {/* <main className="min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full flex items-center justify-center">
+            <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
+            <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover" />
+          </motion.div>
+        </main> */}
 
         {/* 🟢 ABOUT（余白を削減: ptのみ残しpbを小さく） */}
-        <section id="about" className="max-w-4xl mx-auto pt-[30px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+        <section id="about" className="max-w-4xl mx-auto pt-[20px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
             <div className="font-['Mobo'] text-[12.2pt] leading-[2.1] tracking-[0.12em]">
