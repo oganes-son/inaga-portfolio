@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   },
   description: "札幌を拠点に活動するクリエイター「いなが」の公式サイト。楽曲制作（Purify, Paradigm Shift）やグラフィックデザインなどを掲載しています。",
   keywords: ["いなが", "INAGA", "音楽", "デザイン", "北海道大学", "ポートフォリオ", "Purify", "北大"],
+  verification: {
+    google: "C8Z_zfa1YbOqMXeAbiiHU8f3qzEUHG_xqWbPjQwgLhE",
+  },
   icons: {
     icon: "/images/favicon.ico",
   }
