@@ -15,10 +15,11 @@ const geistMono = Geist_Mono({
 //ページタブ説明文
 export const metadata: Metadata = {
   title: {
-  default: "inaga",
-  template: "%s | inaga", 
+    default: "いなが (INAGA) | Portfolio of music / graphic design",
+    template: "%s | inaga", 
   },
-  description: "Portfolio of Composer/Designer inaga",
+  description: "札幌を拠点に活動するクリエイター「いなが」の公式サイト。楽曲制作（Purify, Paradigm Shift）やグラフィックデザインなどを掲載しています。",
+  keywords: ["いなが", "INAGA", "音楽", "デザイン", "北海道大学", "ポートフォリオ", "Purify", "北大"],
   icons: {
     icon: "/images/favicon.ico",
   }
