@@ -11,7 +11,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { FaSoundcloud, FaYoutube } from "react-icons/fa6";
 import { SiNiconico, SiSpotify, SiApplemusic, SiAmazonmusic } from "react-icons/si";
-import { FiTrash2, FiUpload } from "react-icons/fi";
+import { FiTrash2, FiUpload, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 // ─────────────────────────────────────────────
 // Types
@@ -259,7 +259,7 @@ function MobileWorkPreview({ work, imageUrl, isMusic }: {
           {category}
         </div>
         {work.description && (
-          <p className="font-['Mobo'] text-[8pt] leading-relaxed opacity-80 tracking-wider">{work.description}</p>
+          <p className="font-['Mobo'] text-[8pt] leading-relaxed opacity-80 tracking-wider whitespace-pre-wrap">{work.description}</p>
         )}
         {work.tools && (
           <div className="py-2 border-t border-b border-gray-100">
@@ -286,16 +286,15 @@ function PCWorkPreview({ work, imageUrl, isMusic }: {
 }) {
   const imgSrc = imageUrl || (work.filename ? `/images/${isMusic ? "MUSIC" : "DESIGN"} WORKS/${work.filename}` : null);
   const category = isMusic ? "MUSIC / ALBUM DESIGN" : "DESIGN";
-  // 本番ページのレイアウト幅に合わせて描画し、scale(0.42) で縮小表示
-  // outer div で高さを固定してクリップ
+  // 本番ページのレイアウト幅に合わせて描画し、zoom で縮小表示
+  // zoom はレイアウトにも影響するため、内容に応じて高さが自動で決まる
   const RENDER_WIDTH = 640;
-  const SCALE = 0.42;
+  const SCALE = 0.60;
   return (
-    <div style={{ height: "340px", overflow: "hidden", position: "relative" }}>
+    <div>
       <div style={{
         width: `${RENDER_WIDTH}px`,
-        transform: `scale(${SCALE})`,
-        transformOrigin: "top left",
+        zoom: SCALE,
         pointerEvents: "none",
       }}>
         <div className="grid grid-cols-2 gap-16 items-start text-[#333333]">
@@ -319,7 +318,7 @@ function PCWorkPreview({ work, imageUrl, isMusic }: {
               {category}
             </div>
             {work.description && (
-              <div className="font-['Mobo'] text-[11.5pt] leading-relaxed opacity-80 tracking-wider mb-8">
+              <div className="font-['Mobo'] text-[11.5pt] leading-relaxed opacity-80 tracking-wider mb-8 whitespace-pre-wrap">
                 {work.description}
               </div>
             )}
@@ -356,24 +355,76 @@ function NewsPreviewCard({ item }: { item: News }) {
 }
 
 // ─────────────────────────────────────────────
-// SortableItem
+// SortableItem（アコーディオン対応）
 // ─────────────────────────────────────────────
-function SortableItem({ id, index, title, onEdit, onDelete }: {
-  id: string; index: number; title: string; onEdit: () => void; onDelete: () => void;
+function SortableItem({ id, index, title, isExpanded, formContent, onEdit, onDelete, onSave, onCancel, canUndo, canRedo, onUndo, onRedo }: {
+  id: string; index: number; title: string;
+  isExpanded: boolean; formContent: React.ReactNode;
+  onEdit: () => void; onDelete: () => void; onSave: () => void; onCancel: () => void;
+  canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  // アコーディオンが閉じたら削除確認をリセット
+  useEffect(() => { if (!isExpanded) setConfirmDelete(false); }, [isExpanded]);
+
   return (
     <div ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-center gap-2 bg-white border border-gray-200 rounded px-3 py-2">
-      <button {...attributes} {...listeners}
-        className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1 touch-none" title="ドラッグで並び替え">
-        ⠿
-      </button>
-      <span className="text-xs font-['Bahnschrift'] text-gray-400 w-5 text-right shrink-0">{index + 1}</span>
-      <span className="flex-1 truncate font-['Bahnschrift'] tracking-wide text-xs">{title}</span>
-      <button onClick={onEdit} className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors">編集</button>
-      <button onClick={onDelete} className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded transition-colors">削除</button>
+      className={`bg-white border rounded overflow-hidden ${isExpanded ? "border-gray-400" : "border-gray-200"}`}>
+      {/* 行全体: クリックでアコーディオン開閉 + ドラッグ */}
+      <div className="flex items-center gap-2 px-3 py-2 cursor-pointer select-none hover:bg-gray-50 transition-colors"
+        onClick={onEdit} {...attributes} {...listeners}>
+        <span className="text-gray-400 text-sm shrink-0">⠿</span>
+        <span className="text-xs font-['Bahnschrift'] text-gray-400 w-5 text-right shrink-0">{index + 1}</span>
+        <span className="flex-1 truncate font-['Bahnschrift'] tracking-wide text-xs">{title}</span>
+        {/* 削除確認UI */}
+        {confirmDelete ? (
+          <>
+            <span className="text-xs text-red-500 font-['Bahnschrift'] shrink-0">削除しますか？</span>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); setConfirmDelete(false); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="px-2 py-1 text-xs bg-red-500 text-white rounded transition-colors shrink-0">はい</button>
+            <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="px-2 py-1 text-xs border border-gray-200 rounded hover:bg-gray-100 transition-colors shrink-0">いいえ</button>
+          </>
+        ) : (
+          <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0">
+            <FiTrash2 className="text-sm" />
+          </button>
+        )}
+        {/* シェブロン: 開閉状態を示す */}
+        <FiChevronDown className={`text-gray-400 shrink-0 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+      </div>
+      {/* アコーディオン: 編集フォーム */}
+      {isExpanded && (
+        <div className="px-3 pb-4 pt-3 border-t border-gray-100">
+          {formContent}
+          <div className="flex items-center gap-2 mt-4">
+            {/* Undo / Redo */}
+            <button onClick={onUndo} disabled={!canUndo} onPointerDown={(e) => e.stopPropagation()}
+              className="p-2 border border-gray-200 rounded hover:bg-gray-50 transition-colors disabled:opacity-30" title="元に戻す">
+              <FiChevronLeft className="text-sm" />
+            </button>
+            <button onClick={onRedo} disabled={!canRedo} onPointerDown={(e) => e.stopPropagation()}
+              className="p-2 border border-gray-200 rounded hover:bg-gray-50 transition-colors disabled:opacity-30" title="やり直し">
+              <FiChevronRight className="text-sm" />
+            </button>
+            <button onClick={onSave} onPointerDown={(e) => e.stopPropagation()}
+              className="flex-1 py-2 text-xs font-['Bahnschrift'] tracking-widest bg-[#333333] text-white rounded hover:bg-[#555555] transition-colors">
+              一時保存
+            </button>
+            <button onClick={onCancel} onPointerDown={(e) => e.stopPropagation()}
+              className="px-4 py-2 text-xs font-['Bahnschrift'] tracking-widest border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -431,6 +482,10 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   const [isNewItem, setIsNewItem] = useState(false);
   const [originalFilename, setOriginalFilename] = useState("");
 
+  // Undo / Redo 履歴
+  const [editHistory, setEditHistory] = useState<(Work | News)[]>([]);
+  const [editHistoryIdx, setEditHistoryIdx] = useState(-1);
+
   // Image edit state
   const [editImagePending, setEditImagePending] = useState<{ base64: string; localUrl: string; filename: string } | null>(null);
   const [editImageDeleteExisting, setEditImageDeleteExisting] = useState(false);
@@ -467,7 +522,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -488,33 +543,69 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   }
 
   // ── Edit controls ──
+  function initHistory(item: Work | News) {
+    const initial = JSON.parse(JSON.stringify(item));
+    setEditHistory([initial]);
+    setEditHistoryIdx(0);
+  }
+
+  function handleEditChange(newItem: Work | News) {
+    setEditingItem(newItem);
+    setEditHistory((prev) => {
+      const truncated = prev.slice(0, editHistoryIdx + 1);
+      return [...truncated, JSON.parse(JSON.stringify(newItem))];
+    });
+    setEditHistoryIdx((prev) => prev + 1);
+  }
+
+  function handleUndo() {
+    if (editHistoryIdx <= 0) return;
+    const newIdx = editHistoryIdx - 1;
+    setEditHistoryIdx(newIdx);
+    setEditingItem(JSON.parse(JSON.stringify(editHistory[newIdx])));
+  }
+
+  function handleRedo() {
+    if (editHistoryIdx >= editHistory.length - 1) return;
+    const newIdx = editHistoryIdx + 1;
+    setEditHistoryIdx(newIdx);
+    setEditingItem(JSON.parse(JSON.stringify(editHistory[newIdx])));
+  }
+
   function startEdit(index: number) {
+    // 同じ行を再クリックしたら閉じる（トグル）
+    if (editingIndex === index && !isNewItem) { cancelEdit(); return; }
     const item = currentList()[index];
-    setEditingItem(JSON.parse(JSON.stringify(item)));
+    const initial = JSON.parse(JSON.stringify(item));
+    setEditingItem(initial);
     setEditingIndex(index);
     setIsNewItem(false);
     setOriginalFilename(activeTab !== "news" ? (item as Work).filename : "");
     setEditImagePending(null);
     setEditImageDeleteExisting(false);
+    initHistory(initial);
   }
 
   function startNew() {
+    let newItem: Work | News;
     if (activeTab === "music") {
       const list = worksData?.musicWorks ?? [];
       const newId = list.length > 0 ? Math.max(...list.map((w) => w.id)) + 1 : 1;
-      setEditingItem({ id: newId, slug: "", filename: "", title: "", description: "", tools: "", soundcloud: "", youtube: "", niconico: "", spotify: "", appleMusic: "", amazonMusic: "" });
+      newItem = { id: newId, slug: "", filename: "", title: "", description: "", tools: "", soundcloud: "", youtube: "", niconico: "", spotify: "", appleMusic: "", amazonMusic: "" };
     } else if (activeTab === "design") {
       const list = worksData?.designWorks ?? [];
       const newId = list.length > 0 ? Math.max(...list.map((w) => w.id)) + 1 : 1;
-      setEditingItem({ id: newId, slug: "", filename: "", title: "", description: "", tools: "" });
+      newItem = { id: newId, slug: "", filename: "", title: "", description: "", tools: "" };
     } else {
-      setEditingItem({ date: "", content: "", link: "" });
+      newItem = { date: "", content: "", link: "" };
     }
+    setEditingItem(newItem);
     setEditingIndex(null);
     setIsNewItem(true);
     setOriginalFilename("");
     setEditImagePending(null);
     setEditImageDeleteExisting(false);
+    initHistory(newItem);
   }
 
   function cancelEdit() {
@@ -525,6 +616,8 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     setOriginalFilename("");
     setEditImagePending(null);
     setEditImageDeleteExisting(false);
+    setEditHistory([]);
+    setEditHistoryIdx(-1);
   }
 
   // ── Image handlers ──
@@ -594,7 +687,6 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     }
     setWorksData(updated);
     setIsCommitPending(true);
-    setStatusMsg("一時保存しました。「全てコミット」でGitHubに反映されます。");
   }
 
   // ── 一時保存 ──
@@ -631,20 +723,19 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     const updated = { ...worksData };
     if (activeTab === "music") {
       const list = [...worksData.musicWorks];
-      if (editingIndex !== null) list[editingIndex] = finalItem as Work; else list.push(finalItem as Work);
+      if (editingIndex !== null) list[editingIndex] = finalItem as Work; else list.unshift(finalItem as Work);
       updated.musicWorks = list;
     } else if (activeTab === "design") {
       const list = [...worksData.designWorks];
-      if (editingIndex !== null) list[editingIndex] = finalItem as Work; else list.push(finalItem as Work);
+      if (editingIndex !== null) list[editingIndex] = finalItem as Work; else list.unshift(finalItem as Work);
       updated.designWorks = list;
     } else {
       const list = [...worksData.newsData];
-      if (editingIndex !== null) list[editingIndex] = finalItem as News; else list.push(finalItem as News);
+      if (editingIndex !== null) list[editingIndex] = finalItem as News; else list.unshift(finalItem as News);
       updated.newsData = list;
     }
     setWorksData(updated);
     setIsCommitPending(true);
-    setStatusMsg("一時保存しました。「全てコミット」でGitHubに反映されます。");
     cancelEdit();
   }
 
@@ -694,7 +785,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
 
   // ── 削除 ──
   async function handleDelete(index: number) {
-    if (!worksData || !confirm("削除しますか？")) return;
+    if (!worksData) return;
     const item = currentList()[index];
 
     if (activeTab !== "news") {
@@ -716,8 +807,25 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
 
   const list = currentList();
   const previewImageUrl = editImagePending?.localUrl ?? null;
-  const previewWork = editingItem && activeTab !== "news" ? (editingItem as Work) : null;
-  const previewNews = editingItem && activeTab === "news" ? (editingItem as News) : null;
+
+  // デフォルトプレビュー: 編集中でなければリストの1番目を表示
+  const defaultPreviewWork = activeTab !== "news" && activeTab !== "player" && list.length > 0
+    ? list[0] as Work : null;
+  const defaultPreviewNews = activeTab === "news" && list.length > 0
+    ? list[0] as News : null;
+  // PLAYERタブ: 選択中スラッグの作品、未選択なら1番目
+  const playerPreviewWork = activeTab === "player" && worksData
+    ? (worksData.musicWorks.find(w => w.slug === playerSlug) ?? worksData.musicWorks[0] ?? null)
+    : null;
+
+  const previewWork = activeTab === "player"
+    ? playerPreviewWork
+    : editingItem && activeTab !== "news"
+      ? (editingItem as Work)
+      : defaultPreviewWork;
+  const previewNews = activeTab === "news"
+    ? (editingItem ? (editingItem as News) : defaultPreviewNews)
+    : null;
   const isMobilePreview = previewMode === "mobile";
 
   const imageProps: ImageUploadProps = {
@@ -778,7 +886,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
       <div className="flex flex-col md:flex-row gap-0 md:gap-6 p-4 md:p-8 max-w-6xl mx-auto">
 
         {/* Left: Preview */}
-        <div className="md:w-[300px] shrink-0">
+        <div className="md:w-[40%] shrink-0">
           <div className="bg-white border border-gray-200 rounded-xl p-4 md:sticky md:top-6">
             {/* PC / スマホ 切り替えタブ */}
             <div className="flex items-center justify-between mb-4">
@@ -795,14 +903,14 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
               </div>
             </div>
 
-            {!editingItem && (
+            {!previewWork && !previewNews && (
               <p className="text-xs opacity-30 font-['Bahnschrift'] tracking-widest text-center py-8">
-                編集ボタンを押すと<br />プレビューが表示されます
+                作品がありません
               </p>
             )}
 
             {/* スマホモード: phone frame（固定サイズ・内部スクロール） */}
-            {editingItem && isMobilePreview && (
+            {(previewWork || previewNews) && isMobilePreview && (
               <div className="mx-auto border-4 border-gray-800 rounded-[28px] overflow-hidden shadow-xl bg-white"
                 style={{ width: "212px", height: "440px", display: "flex", flexDirection: "column" }}>
                 {/* ノッチ */}
@@ -813,7 +921,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                 <div className="overflow-y-auto bg-white flex-1">
                   {previewWork && (
                     <MobileWorkPreview work={previewWork} imageUrl={previewImageUrl}
-                      isMusic={activeTab === "music"} />
+                      isMusic={activeTab === "music" || activeTab === "player"} />
                   )}
                   {previewNews && <div className="p-3"><NewsPreviewCard item={previewNews} /></div>}
                 </div>
@@ -821,11 +929,11 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             )}
 
             {/* PCモード: 本番と同寸法で描画→scale縮小 */}
-            {editingItem && !isMobilePreview && (
+            {(previewWork || previewNews) && !isMobilePreview && (
               <div className="bg-white border border-gray-100 rounded-lg p-3 overflow-hidden">
                 {previewWork && (
                   <PCWorkPreview work={previewWork} imageUrl={previewImageUrl}
-                    isMusic={activeTab === "music"} />
+                    isMusic={activeTab === "music" || activeTab === "player"} />
                 )}
                 {previewNews && <NewsPreviewCard item={previewNews} />}
               </div>
@@ -918,44 +1026,66 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={list.map((_, i) => String(i))} strategy={verticalListSortingStrategy}>
                   <div className="flex flex-col gap-2">
-                    {list.map((item, index) => (
-                      <SortableItem key={index} id={String(index)} index={index}
-                        title={activeTab === "news"
-                          ? `${(item as News).date}  ${(item as News).content.slice(0, 20)}`
-                          : (item as Work).title}
-                        onEdit={() => startEdit(index)}
-                        onDelete={() => handleDelete(index)} />
-                    ))}
+                    {/* 新規追加フォーム: リスト最上部に表示 */}
+                    {isNewItem && editingItem && (
+                      <div className="bg-white border-2 border-dashed border-blue-300 rounded overflow-hidden">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50">
+                          <span className="text-xs font-['Bahnschrift'] text-blue-400 tracking-widest shrink-0">NEW</span>
+                          <span className="flex-1 truncate font-['Bahnschrift'] tracking-wide text-xs text-blue-500">
+                            {activeTab !== "news" ? ((editingItem as Work).title || "（タイトル未入力）") : ((editingItem as News).date || "新規ニュース")}
+                          </span>
+                          <button onClick={cancelEdit} onPointerDown={(e) => e.stopPropagation()}
+                            className="px-2 py-1 text-xs border border-gray-200 rounded hover:bg-gray-50 transition-colors shrink-0">
+                            キャンセル
+                          </button>
+                        </div>
+                        <div className="px-3 pb-4 pt-3 border-t border-blue-100">
+                          {activeTab === "music" && <MusicForm item={editingItem as Work} onChange={handleEditChange} imageProps={imageProps} />}
+                          {activeTab === "design" && <DesignForm item={editingItem as Work} onChange={handleEditChange} imageProps={imageProps} />}
+                          {activeTab === "news" && <NewsForm item={editingItem as News} onChange={handleEditChange} />}
+                          <div className="flex gap-2 mt-4">
+                            <button onClick={handleTempSave}
+                              className="flex-1 py-2 text-xs font-['Bahnschrift'] tracking-widest bg-[#333333] text-white rounded hover:bg-[#555555] transition-colors">
+                              一時保存
+                            </button>
+                            <button onClick={cancelEdit}
+                              className="px-4 py-2 text-xs font-['Bahnschrift'] tracking-widest border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+                              キャンセル
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {list.map((item, index) => {
+                      const isExpanded = editingIndex === index && !isNewItem;
+                      const itemTitle = activeTab === "news"
+                        ? `${(item as News).date}  ${(item as News).content.slice(0, 20)}`
+                        : (item as Work).title;
+                      const formContent = isExpanded ? (
+                        <>
+                          {activeTab === "music" && <MusicForm item={editingItem as Work} onChange={handleEditChange} imageProps={imageProps} />}
+                          {activeTab === "design" && <DesignForm item={editingItem as Work} onChange={handleEditChange} imageProps={imageProps} />}
+                          {activeTab === "news" && <NewsForm item={editingItem as News} onChange={handleEditChange} />}
+                        </>
+                      ) : null;
+                      return (
+                        <SortableItem key={index} id={String(index)} index={index}
+                          title={itemTitle}
+                          isExpanded={isExpanded}
+                          formContent={formContent}
+                          onEdit={() => startEdit(index)}
+                          onDelete={() => handleDelete(index)}
+                          onSave={handleTempSave}
+                          onCancel={cancelEdit}
+                          canUndo={editHistoryIdx > 0}
+                          canRedo={editHistoryIdx < editHistory.length - 1}
+                          onUndo={handleUndo}
+                          onRedo={handleRedo} />
+                      );
+                    })}
                   </div>
                 </SortableContext>
               </DndContext>
-
-              {editingItem && (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 mt-2">
-                  <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase mb-4">
-                    {isNewItem ? "新規追加" : "編集"}
-                  </p>
-                  {activeTab === "music" && (
-                    <MusicForm item={editingItem as Work} onChange={(v) => setEditingItem(v)} imageProps={imageProps} />
-                  )}
-                  {activeTab === "design" && (
-                    <DesignForm item={editingItem as Work} onChange={(v) => setEditingItem(v)} imageProps={imageProps} />
-                  )}
-                  {activeTab === "news" && (
-                    <NewsForm item={editingItem as News} onChange={(v) => setEditingItem(v)} />
-                  )}
-                  <div className="flex gap-2 mt-4">
-                    <button onClick={handleTempSave}
-                      className="flex-1 py-2 text-xs font-['Bahnschrift'] tracking-widest bg-[#333333] text-white rounded hover:bg-[#555555] transition-colors">
-                      一時保存
-                    </button>
-                    <button onClick={cancelEdit}
-                      className="px-4 py-2 text-xs font-['Bahnschrift'] tracking-widest border border-gray-200 rounded hover:bg-gray-50 transition-colors">
-                      キャンセル
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
