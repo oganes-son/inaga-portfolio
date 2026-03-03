@@ -1,0 +1,125 @@
+{
+  "musicWorks": [
+    {
+      "id": 1,
+      "slug": "paradigm-shift",
+      "filename": "PARADIGM_SHIFT.png",
+      "title": "ALBUM PARADIGM SHIFT",
+      "description": "ここに作品のコンセプトとか伝えたいこととかあったら書いてもらって。",
+      "tools": "お金, 時間, やる気, おいしいごはん",
+      "soundcloud": "https://soundcloud.com/sgextgl4iyy9",
+      "youtube": "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ",
+      "niconico": "",
+      "spotify": "",
+      "appleMusic": "",
+      "amazonMusic": ""
+    },
+    {
+      "id": 2,
+      "slug": "cyber-metroplex",
+      "filename": "CYBER_METROPLEX.png",
+      "title": "CYBER METROPLEX",
+      "description": "",
+      "tools": "",
+      "soundcloud": "https://soundcloud.com/sgextgl4iyy9",
+      "youtube": "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ",
+      "niconico": "",
+      "spotify": "",
+      "appleMusic": "",
+      "amazonMusic": ""
+    },
+    {
+      "id": 3,
+      "slug": "fantasie-impromptu",
+      "filename": "Fantasie_Impromptu(Remix).png",
+      "title": "Fantasie Impromptu (Remix)",
+      "description": "",
+      "tools": "",
+      "soundcloud": "https://soundcloud.com/sgextgl4iyy9",
+      "youtube": "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ",
+      "niconico": "",
+      "spotify": "",
+      "appleMusic": "",
+      "amazonMusic": ""
+    },
+    {
+      "id": 4,
+      "slug": "purify",
+      "filename": "Purify.png",
+      "title": "Purify",
+      "description": "",
+      "tools": "",
+      "soundcloud": "https://soundcloud.com/sgextgl4iyy9",
+      "youtube": "https://www.youtube.com/channel/UCqKZxqgCvRkReqnejZIMydQ",
+      "niconico": "",
+      "spotify": "",
+      "appleMusic": "",
+      "amazonMusic": ""
+    }
+  ],
+  "designWorks": [
+    {
+      "id": 1,
+      "slug": "aquarhythm",
+      "filename": "AQUARHYTHM.png",
+      "title": "AQUARHYTHM(From 楡陵祭)",
+      "description": "",
+      "tools": ""
+    },
+    {
+      "id": 2,
+      "slug": "colorful-smoke",
+      "filename": "COLORFUL SMOKE.png",
+      "title": "COLORFUL SMOKE",
+      "description": "",
+      "tools": ""
+    },
+    {
+      "id": 3,
+      "slug": "harmonite",
+      "filename": "HARMONITE.png",
+      "title": "HARMONITE (From楡陵祭)",
+      "description": "",
+      "tools": ""
+    },
+    {
+      "id": 4,
+      "slug": "lunar-prober",
+      "filename": "LUNAR PROBER.png",
+      "title": "LUNAR PROBER",
+      "description": "",
+      "tools": ""
+    },
+    {
+      "id": 5,
+      "slug": "reconst",
+      "filename": "RECONST.png",
+      "title": "RECONST",
+      "description": "",
+      "tools": ""
+    },
+    {
+      "id": 6,
+      "slug": "outen",
+      "filename": "outen.png",
+      "title": "横転",
+      "description": "",
+      "tools": ""
+    },
+    {
+      "id": 7,
+      "slug": "nengajo-2026",
+      "filename": "nengajo.png",
+      "title": "年賀状2026",
+      "description": "",
+      "tools": ""
+    }
+  ],
+  "newsData": [
+    {
+      "date": "2026.02.2",
+      "content": "ポートフォリオサイトを公開しました。",
+      "link": ""
+    }
+  ]
+}

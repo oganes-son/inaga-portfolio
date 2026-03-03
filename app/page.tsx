@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, AnimatePresence, useMotionValueEvent } from "framer-motion";
 import { FaXTwitter, FaSoundcloud, FaYoutube, FaInstagram, FaRegEnvelope } from "react-icons/fa6";
+import { SiNiconico, SiSpotify, SiApplemusic, SiAmazonmusic } from "react-icons/si";
 import { musicWorks, designWorks, newsData } from "@/lib/works"; 
 import { VisualizerStyle2 } from '@/components/VisualizerStyle2';
 
@@ -36,6 +37,15 @@ function ContactLink({ href, icon, text }: { href: string; icon: any; text: stri
   );
 }
 
+const SNS_ICONS = [
+  { key: "soundcloud", Icon: FaSoundcloud, hoverColor: "hover:text-[#ff3300]" },
+  { key: "youtube",    Icon: FaYoutube,    hoverColor: "hover:text-[#ff0000]" },
+  { key: "niconico",   Icon: SiNiconico,   hoverColor: "hover:text-[#82c8ef]" },
+  { key: "spotify",    Icon: SiSpotify,    hoverColor: "hover:text-[#1db954]" },
+  { key: "appleMusic", Icon: SiApplemusic, hoverColor: "hover:text-[#fc3c44]" },
+  { key: "amazonMusic",Icon: SiAmazonmusic,hoverColor: "hover:text-[#00a8e1]" },
+];
+
 function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' | 'design' }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({ left: false, right: true });
@@ -64,8 +74,15 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
             </a>
             {type === 'music' && (
               <div className="flex justify-center gap-6 text-[22px] md:text-[26px] opacity-70">
-                <motion.a href={work.soundcloud} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff3300] transition-colors"><FaSoundcloud /></motion.a>
-                <motion.a href={work.youtube} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff0000] transition-colors"><FaYoutube /></motion.a>
+                {SNS_ICONS.map(({ key, Icon, hoverColor }) =>
+                  work[key] ? (
+                    <motion.a key={key} href={work[key]} target="_blank" rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1 }}
+                      className={`transition-colors ${hoverColor}`}>
+                      <Icon />
+                    </motion.a>
+                  ) : null
+                )}
               </div>
             )}
           </motion.div>
@@ -235,7 +252,7 @@ export default function Home() {
           </motion.a>
         </nav>
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
-          © 2026 INAGA | DEVELOPED BY{" "}
+          <a href="/admin" className="no-underline hover:opacity-100 transition-opacity">© 2026</a>{" "}INAGA | DEVELOPED BY{" "}
           <a href="https://github.com/oganes-son" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
             OGANESSON
           </a>
