@@ -23,10 +23,11 @@ type Work = {
   spotify?: string; appleMusic?: string; amazonMusic?: string;
 };
 type News = { date: string; content: string; link?: string; };
-type WorksData = { musicWorks: Work[]; designWorks: Work[]; newsData: News[]; };
-type ActiveTab = "music" | "design" | "news";
-type PendingUpload = { filename: string; base64: string; localUrl: string; type: "music" | "design"; };
-type PendingDeletion = { filename: string; type: "music" | "design"; };
+type PlayerTrack = { slug: string; mp3Filename: string; };
+type WorksData = { musicWorks: Work[]; designWorks: Work[]; newsData: News[]; playerTrack: PlayerTrack; };
+type ActiveTab = "music" | "design" | "news" | "player";
+type PendingUpload = { filename: string; base64: string; localUrl: string; type: "music" | "design" | "mp3"; };
+type PendingDeletion = { filename: string; type: "music" | "design" | "mp3"; };
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -442,12 +443,19 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   const [statusMsg, setStatusMsg] = useState("");
   const [previewMode, setPreviewMode] = useState<"pc" | "mobile">("pc");
 
+  // PLAYER タブ用
+  const [playerSlug, setPlayerSlug] = useState<string>("");
+  const [playerMp3Pending, setPlayerMp3Pending] = useState<{ base64: string; filename: string } | null>(null);
+
   const authHeader = { Authorization: `Bearer ${password}` };
 
   useEffect(() => {
     fetch("/api/admin/data", { headers: authHeader, cache: "no-store" })
       .then((r) => r.json())
-      .then(({ data }) => setWorksData(data))
+      .then(({ data }) => {
+        setWorksData(data);
+        setPlayerSlug(data.playerTrack?.slug ?? "");
+      })
       .catch(() => setStatusMsg("データの取得に失敗しました。"));
   }, []);
 
@@ -558,6 +566,35 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     if (editingItem && activeTab !== "news") {
       setEditingItem({ ...(editingItem as Work), filename: originalFilename });
     }
+  }
+
+  // ── PLAYER: MP3選択 ──
+  async function handleMp3Select(file: File) {
+    return new Promise<void>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(",")[1];
+        setPlayerMp3Pending({ base64, filename: file.name });
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── PLAYER: 一時保存 ──
+  function handlePlayerTempSave() {
+    if (!worksData || !playerSlug) return;
+    const mp3Filename = playerMp3Pending?.filename ?? worksData.playerTrack.mp3Filename;
+    const updated: WorksData = { ...worksData, playerTrack: { slug: playerSlug, mp3Filename } };
+    if (playerMp3Pending) {
+      setPendingUploads((prev) => [
+        ...prev.filter((p) => p.type !== "mp3"),
+        { filename: playerMp3Pending.filename, base64: playerMp3Pending.base64, localUrl: "", type: "mp3" },
+      ]);
+    }
+    setWorksData(updated);
+    setIsCommitPending(true);
+    setStatusMsg("一時保存しました。「全てコミット」でGitHubに反映されます。");
   }
 
   // ── 一時保存 ──
@@ -702,7 +739,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
         <div className="flex items-center gap-4 flex-wrap">
           <h1 className="font-['Bahnschrift'] text-base tracking-[0.3em]">INAGA ADMIN</h1>
           <nav className="flex gap-1">
-            {(["music", "design", "news"] as ActiveTab[]).map((tab) => (
+            {(["music", "design", "news", "player"] as ActiveTab[]).map((tab) => (
               <button key={tab} onClick={() => { setActiveTab(tab); cancelEdit(); }}
                 className={`px-3 py-1.5 text-xs font-['Bahnschrift'] tracking-widest rounded transition-colors ${activeTab === tab ? "bg-[#333333] text-white" : "text-gray-500 hover:bg-gray-100"}`}>
                 {tab.toUpperCase()}
@@ -801,6 +838,72 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
           {!worksData ? (
             <div className="flex items-center justify-center h-40">
               <p className="text-xs opacity-40 font-['Bahnschrift'] tracking-widest">読み込み中...</p>
+            </div>
+          ) : activeTab === "player" ? (
+            /* ── PLAYER タブ ── */
+            <div className="flex flex-col gap-4">
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase mb-4">Player 設定</p>
+
+                {/* 楽曲選択 */}
+                <div className="flex flex-col gap-1 mb-4">
+                  <label className="text-xs font-['Bahnschrift'] tracking-widest opacity-70 uppercase">楽曲を選択</label>
+                  <select
+                    value={playerSlug}
+                    onChange={(e) => setPlayerSlug(e.target.value)}
+                    className="border border-gray-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-gray-400 font-['Bahnschrift'] tracking-wide">
+                    <option value="">-- 選択してください --</option>
+                    {worksData.musicWorks.map((w) => (
+                      <option key={w.slug} value={w.slug}>{w.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 選択中の作品プレビュー */}
+                {playerSlug && (() => {
+                  const w = worksData.musicWorks.find((m) => m.slug === playerSlug);
+                  return w ? (
+                    <div className="flex items-center gap-3 bg-gray-50 rounded p-3 mb-4">
+                      <img src={`/images/MUSIC WORKS/${w.filename}`} alt={w.title}
+                        className="w-12 h-12 object-cover shadow" />
+                      <div>
+                        <p className="text-xs font-['Mobo-bold'] tracking-wider">{w.title}</p>
+                        <p className="text-xs opacity-40 font-['Bahnschrift'] tracking-widest">INAGA</p>
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
+
+                {/* MP3アップロード */}
+                <div className="flex flex-col gap-1 mb-4">
+                  <label className="text-xs font-['Bahnschrift'] tracking-widest opacity-70 uppercase">MP3ファイル</label>
+                  <input type="file" accept=".mp3,audio/*" className="hidden"
+                    id="mp3-upload"
+                    onChange={(e) => { if (e.target.files?.[0]) handleMp3Select(e.target.files[0]); }} />
+                  <label htmlFor="mp3-upload"
+                    className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-colors text-xs text-gray-500 font-['Bahnschrift'] tracking-widest cursor-pointer">
+                    ↑ MP3をアップロード
+                  </label>
+                  {playerMp3Pending ? (
+                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded px-3 py-2">
+                      <span className="text-xs text-blue-400 shrink-0">↑ 新規:</span>
+                      <span className="flex-1 text-xs font-['Bahnschrift'] tracking-wide truncate">{playerMp3Pending.filename}</span>
+                      <button onClick={() => setPlayerMp3Pending(null)} className="text-red-400 hover:text-red-600 shrink-0">
+                        <FiTrash2 className="text-sm" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs opacity-40 font-['Bahnschrift'] tracking-wide">
+                      現在: {worksData.playerTrack.mp3Filename}
+                    </p>
+                  )}
+                </div>
+
+                <button onClick={handlePlayerTempSave} disabled={!playerSlug}
+                  className="w-full py-2 text-xs font-['Bahnschrift'] tracking-widest bg-[#333333] text-white rounded hover:bg-[#555555] transition-colors disabled:opacity-40">
+                  一時保存
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-4">

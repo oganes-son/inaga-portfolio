@@ -8,7 +8,8 @@ function checkAuth(request: NextRequest) {
   return auth === `Bearer ${process.env.ADMIN_PASSWORD}`;
 }
 
-function getImagePath(filename: string, type: "music" | "design"): string {
+function getImagePath(filename: string, type: "music" | "design" | "mp3"): string {
+  if (type === "mp3") return `public/music/${filename}`;
   const folder = type === "music" ? "MUSIC WORKS" : "DESIGN WORKS";
   return `public/images/${folder}/${filename}`;
 }
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { base64, filename, type } = await request.json();
+  const { base64, filename, type } = await request.json() as { base64: string; filename: string; type: "music" | "design" | "mp3" };
   const filePath = getImagePath(filename, type);
 
   // Check if file already exists to get SHA
@@ -66,7 +67,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { filename, type } = await request.json();
+  const { filename, type } = await request.json() as { filename: string; type: "music" | "design" | "mp3" };
   const filePath = getImagePath(filename, type);
 
   // Get SHA

@@ -121,5 +121,9 @@
       "content": "ポートフォリオサイトを公開しました。",
       "link": ""
     }
-  ]
+  ],
+  "playerTrack": {
+    "slug": "purify",
+    "mp3Filename": "Purify.mp3"
+  }
 }

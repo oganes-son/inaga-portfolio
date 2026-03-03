@@ -21,6 +21,12 @@ export type News = {
   link?: string;
 };
 
+export type PlayerTrack = {
+  slug: string;
+  mp3Filename: string;
+};
+
 export const musicWorks: Work[] = worksData.musicWorks;
 export const designWorks: Work[] = worksData.designWorks;
 export const newsData: News[] = worksData.newsData;
+export const playerTrack: PlayerTrack = worksData.playerTrack;
