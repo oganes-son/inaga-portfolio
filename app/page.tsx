@@ -65,20 +65,30 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
         {items.map((work) => (
           <motion.div key={work.id} className="group/item flex flex-col items-center gap-4 snap-start shrink-0 basis-auto w-auto">
             <a href={`/work-slug/${work.slug}`} className="block">
+                  {/* 作品カード画像
+                  高さ: h-[220px](スマホ) / md:h-[300px](PC)（変更で全カードのサイズが変わる）
+                  幅: w-auto（画像のアスペクト比に従う）*/}
               <div className="relative shadow-2xl bg-white border border-[#333333]/5 overflow-hidden h-[220px] md:h-[300px] w-auto">
                 <img src={encodeURI(`/images/${type.toUpperCase()} WORKS/${work.filename}`)} alt={work.title} className="h-full w-auto object-cover transition-transform duration-500 group-hover/item:scale-105" />
               </div>
+              {/* 作品タイトル
+                  フォント: font-['Mobo']
+                  サイズ: text-[11pt](スマホ) / md:text-[12.2pt](PC)
+                  文字間: tracking-wider / 行間: leading-relaxed */}
               <div className="font-['Mobo'] px-1 mt-6 text-center">
                 <p className="text-[11pt] md:text-[12.2pt] hover:opacity-60 transition-opacity leading-relaxed tracking-wider mb-4">{work.title}</p>
               </div>
             </a>
             {type === 'music' && (
-              <div className="flex justify-center gap-6 text-[22px] md:text-[26px] opacity-70">
-                {SNS_ICONS.map(({ key, Icon, hoverColor }) =>
+              <div className="flex justify-center gap-6 text-[22px] md:text-[26px]">
+                {/* アイコンサイズ: text-[22px](スマホ) / md:text-[26px](PC)
+                    各アイコン透明度: opacity-70（通常）/ hover:opacity-40（ホバー）
+                    ホバー拡大: whileHover scale 1.1 */}
+                {SNS_ICONS.map(({ key, Icon }) =>
                   work[key] ? (
                     <motion.a key={key} href={work[key]} target="_blank" rel="noopener noreferrer"
                       whileHover={{ scale: 1.1 }}
-                      className={`transition-colors ${hoverColor}`}>
+                      className="opacity-70 hover:opacity-40 transition-opacity">
                       <Icon />
                     </motion.a>
                   ) : null
@@ -169,11 +179,28 @@ export default function Home() {
           </motion.div>
         </main> */}
 
-        {/* 🟢 ABOUT（余白を削減: ptのみ残しpbを小さく） */}
-        <section id="about" className="max-w-4xl mx-auto pt-[40px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+        {/* 🟢 ABOUT ─────────────────────────────────────────
+            scroll-mt-4:  スマホ時のアンカー上余白 (4 = 16px)
+            md:scroll-mt-24: PC時のアンカー上余白 (24 = 96px、固定ヘッダー分)
+            pt-[40px]: 上内側余白(スマホ) / md:pt-[60px]: 上内側余白(PC)
+            ──────────────────────────────────────────────── */}
+        <section id="about" className="max-w-4xl mx-auto pt-[40px] md:pt-[60px] pb-[10px] px-6 flex flex-col justify-center text-left scroll-mt-4 md:scroll-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.8 }}>
+            {/* セクション見出し
+                フォント: font-['Bahnschrift'] / サイズ: text-[21.3pt]
+                文字間: tracking-widest / 下余白: mb-8 */}
             <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">ABOUT</h2>
+            {/* 本文ブロック
+                フォント: font-['Mobo']
+                サイズ: text-[9.5pt](スマホ) / md:text-[12.2pt](PC)
+                行間: leading-[2.1]（数値を上げると広がる）
+                文字間: tracking-[0.12em]（数値を上げると広がる）*/}
             <div className="font-['Mobo'] text-[9.5pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em]">
+              {/* 大見出し名前
+                  フォント: font-['Mobo-bold']
+                  サイズ: text-[32pt](スマホ) / md:text-[45.7pt](PC)
+                  行間: leading-tight / 文字間: tracking-widest
+                  上下余白: my-10 / 左ずらし: -ml-1(スマホ) md:-ml-2(PC) */}
               <p className="text-[32pt] md:text-[45.7pt] font-['Mobo-bold'] leading-tight my-10 tracking-widest -ml-1 md:-ml-2">いなが</p>
               <p>2004年11月24日生まれの21歳。札幌在住。</p>
               <p>音楽やグラフィックデザインを制作。</p>
@@ -187,10 +214,19 @@ export default function Home() {
           <VisualizerStyle2 />
         </section>
 
-        {/* 🟢 WORKS（余白を削減: ptを小さく設定） */}
-        <section id="works" className="max-w-4xl mx-auto pt-[20px] pb-[60px] px-6 flex flex-col justify-center text-left scroll-mt-24">
+        {/* 🟢 WORKS ─────────────────────────────────────────
+            scroll-mt-4 / md:scroll-mt-24: アンカー上余白（ABOUT と同様）
+            pt-[20px]: 上内側余白 / pb-[60px]: 下内側余白
+            ──────────────────────────────────────────────── */}
+        <section id="works" className="max-w-4xl mx-auto pt-[20px] pb-[60px] px-6 flex flex-col justify-center text-left scroll-mt-4 md:scroll-mt-24">
+          {/* WORKS見出し
+              フォント: font-['Bahnschrift'] / サイズ: text-[21.3pt]
+              文字間: tracking-widest / 下余白: mb-12 */}
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest uppercase">WORKS</h2>
           <div className="mb-16">
+            {/* サブ見出し（MUSIC / DESIGN）
+                フォント: font-['Bahnschrift'] / サイズ: text-[16pt]
+                文字間: tracking-widest / 下余白: mb-8 */}
             <h3 className="text-[16pt] font-['Bahnschrift'] mb-8 tracking-widest border-b border-[#333333]/20 pb-2 uppercase">MUSIC</h3>
             <HorizontalScrollGallery items={musicWorks} type="music" />
           </div>
@@ -200,15 +236,25 @@ export default function Home() {
           </div>
         </section>
 
-        {/* NEWS */}
-        <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-24">
+        {/* NEWS ──────────────────────────────────────────
+            scroll-mt-4 / md:scroll-mt-24: アンカー上余白
+            py-[60px]: 上下内側余白
+            ──────────────────────────────────────────── */}
+        <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-4 md:scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">NEWS</h2>
           <div className="bg-white rounded-2xl shadow-sm border border-[#333333]/5 overflow-hidden">
             <div className="max-h-[300px] overflow-y-auto p-8 space-y-6">
               {newsData.map((item, index) => (
                 <div key={index} className="flex flex-col md:flex-row md:gap-8 border-b border-[#333333]/10 pb-4 last:border-0 font-['Mobo']">
+                  {/* 日付
+                      フォント: font-['Bahnschrift'] / サイズ: text-[9.5pt](スマホ) md:text-[10pt](PC)
+                      文字間: tracking-widest / 透明度: opacity-70 */}
                   <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[9.5pt] md:text-[10pt] shrink-0">{item.date}</span>
                   <div className="flex flex-col gap-2">
+                    {/* ニュース本文
+                        フォント: font-['Mobo']（親から継承）
+                        サイズ: text-[9.5pt](スマホ) / md:text-[12.2pt](PC)
+                        行間: leading-[2.1] / 文字間: tracking-[0.12em] */}
                     <span className="text-[9.5pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em tracking-wider">{item.content}</span>
                     {item.link && (
                       <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[9pt] font-['Bahnschrift'] tracking-widest opacity-50 hover:opacity-100 underline underline-offset-4 transition-opacity w-fit uppercase">Visit Link →</a>
@@ -220,8 +266,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CONTACT */}
-        <section id="contact" className="max-w-4xl mx-auto pt-[60px] pb-[170px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-24">
+        {/* CONTACT ───────────────────────────────────────
+            scroll-mt-4 / md:scroll-mt-24: アンカー上余白
+            pt-[60px]: 上内側余白 / pb-[170px]: 下内側余白
+            ──────────────────────────────────────────── */}
+        <section id="contact" className="max-w-4xl mx-auto pt-[60px] pb-[170px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-4 md:scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-12 tracking-widest uppercase">CONTACT</h2>
           <div className="flex flex-col gap-10">
             <ContactLink href="mailto:inagainagainaga@gmail.com" icon={<FaRegEnvelope />} text="inagainagainaga@gmail.com" />
