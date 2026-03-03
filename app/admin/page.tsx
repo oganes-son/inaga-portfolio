@@ -243,14 +243,14 @@ function MobileWorkPreview({ work, imageUrl, isMusic }: {
   const imgSrc = imageUrl || (work.filename ? `/images/${isMusic ? "MUSIC" : "DESIGN"} WORKS/${work.filename}` : null);
   const category = isMusic ? "MUSIC / ALBUM DESIGN" : "DESIGN";
   return (
-    <div className="flex flex-col gap-4 text-[#333333] pb-4">
+    <div className="flex flex-col gap-4 text-[#333333] pb-4 pt-4 px-3">
       {imgSrc && (
-        <div className="w-full bg-white overflow-hidden shadow-sm">
+        <div className="w-full bg-white overflow-hidden shadow-2xl border border-[#333333]/5">
           <img src={imgSrc} alt={work.title} className="w-full h-auto object-contain"
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
         </div>
       )}
-      <div className="flex flex-col gap-2 px-3">
+      <div className="flex flex-col gap-2">
         <h1 className="text-[14pt] font-['Mobo-bold'] leading-tight tracking-wider">
           {work.title || "（タイトル未入力）"}
         </h1>
@@ -357,8 +357,8 @@ function NewsPreviewCard({ item }: { item: News }) {
 // ─────────────────────────────────────────────
 // SortableItem
 // ─────────────────────────────────────────────
-function SortableItem({ id, title, onEdit, onDelete }: {
-  id: string; title: string; onEdit: () => void; onDelete: () => void;
+function SortableItem({ id, index, title, onEdit, onDelete }: {
+  id: string; index: number; title: string; onEdit: () => void; onDelete: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   return (
@@ -369,6 +369,7 @@ function SortableItem({ id, title, onEdit, onDelete }: {
         className="text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing p-1 touch-none" title="ドラッグで並び替え">
         ⠿
       </button>
+      <span className="text-xs font-['Bahnschrift'] text-gray-400 w-5 text-right shrink-0">{index + 1}</span>
       <span className="flex-1 truncate font-['Bahnschrift'] tracking-wide text-xs">{title}</span>
       <button onClick={onEdit} className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors">編集</button>
       <button onClick={onDelete} className="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded transition-colors">削除</button>
@@ -815,7 +816,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                 <SortableContext items={list.map((_, i) => String(i))} strategy={verticalListSortingStrategy}>
                   <div className="flex flex-col gap-2">
                     {list.map((item, index) => (
-                      <SortableItem key={index} id={String(index)}
+                      <SortableItem key={index} id={String(index)} index={index}
                         title={activeTab === "news"
                           ? `${(item as News).date}  ${(item as News).content.slice(0, 20)}`
                           : (item as Work).title}
