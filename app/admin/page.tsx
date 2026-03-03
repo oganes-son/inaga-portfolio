@@ -236,93 +236,107 @@ function NewsForm({ item, onChange }: { item: News; onChange: (v: News) => void 
 // Preview Cards（本番UIに合わせたレイアウト）
 // ─────────────────────────────────────────────
 
-// 作品詳細ページ（work-slug）に合わせたカード
-function WorkDetailPreview({
-  work, imageUrl, isMusic, isMobile,
-}: {
-  work: Work; imageUrl: string | null; isMusic: boolean; isMobile: boolean;
+// スマホプレビュー用コンテンツ（phone frame内・1カラム）
+function MobileWorkPreview({ work, imageUrl, isMusic }: {
+  work: Work; imageUrl: string | null; isMusic: boolean;
 }) {
   const imgSrc = imageUrl || (work.filename ? `/images/${isMusic ? "MUSIC" : "DESIGN"} WORKS/${work.filename}` : null);
   const category = isMusic ? "MUSIC / ALBUM DESIGN" : "DESIGN";
-
-  if (isMobile) {
-    // スマホ: 1カラム縦積み（phone frame内）
-    return (
-      <div className="flex flex-col gap-4 text-[#333333]">
-        {imgSrc && (
-          <div className="w-full bg-white border border-gray-100 overflow-hidden shadow">
-            <img src={imgSrc} alt={work.title} className="w-full h-auto object-contain"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-          </div>
-        )}
-        <div className="flex flex-col gap-2 px-1">
-          <h1 className="text-[14pt] font-['Mobo-bold'] leading-tight tracking-wider">
-            {work.title || "（タイトル未入力）"}
-          </h1>
-          <div className="font-['Bahnschrift'] text-[7pt] opacity-60 tracking-widest uppercase border-b border-gray-200 pb-1 w-fit">
-            {category}
-          </div>
-          {work.description && (
-            <p className="font-['Mobo'] text-[8pt] leading-relaxed opacity-80 tracking-wider mt-1">
-              {work.description}
-            </p>
-          )}
-          {work.tools && (
-            <div className="py-2 border-t border-b border-gray-100 mt-1">
-              <p className="font-['Bahnschrift'] text-[6pt] opacity-40 tracking-widest uppercase mb-1">Tools Used</p>
-              <p className="font-['Mobo'] text-[7.5pt] opacity-70 tracking-wider leading-relaxed">{work.tools}</p>
-            </div>
-          )}
-          {isMusic && (
-            <div className="flex items-center gap-4 mt-1 text-[16pt] text-[#333333]/80">
-              {SNS_ICONS.map(({ key, Icon }) =>
-                work[key as keyof Work] ? <span key={key} className="opacity-70"><Icon /></span> : null
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // PC: 2カラム（左: 画像 / 右: テキスト）
   return (
-    <div className="grid grid-cols-2 gap-3 text-[#333333]">
-      <div className="bg-white border border-gray-100 overflow-hidden shadow">
-        {imgSrc ? (
+    <div className="flex flex-col gap-4 text-[#333333] pb-4">
+      {imgSrc && (
+        <div className="w-full bg-white overflow-hidden shadow-sm">
           <img src={imgSrc} alt={work.title} className="w-full h-auto object-contain"
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-        ) : (
-          <div className="w-full h-20 bg-gray-50 flex items-center justify-center">
-            <span className="text-xs opacity-30 font-['Bahnschrift']">NO IMAGE</span>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <h1 className="text-[9pt] font-['Mobo-bold'] leading-tight tracking-wider">
+        </div>
+      )}
+      <div className="flex flex-col gap-2 px-3">
+        <h1 className="text-[14pt] font-['Mobo-bold'] leading-tight tracking-wider">
           {work.title || "（タイトル未入力）"}
         </h1>
-        <div className="font-['Bahnschrift'] text-[6pt] opacity-60 tracking-widest uppercase border-b border-gray-200 pb-1 w-fit">
+        <div className="font-['Bahnschrift'] text-[7pt] opacity-60 tracking-widest uppercase border-b border-gray-200 pb-1 w-fit">
           {category}
         </div>
         {work.description && (
-          <p className="font-['Mobo'] text-[6.5pt] leading-relaxed opacity-80 tracking-wider mt-0.5">
-            {work.description}
-          </p>
+          <p className="font-['Mobo'] text-[8pt] leading-relaxed opacity-80 tracking-wider">{work.description}</p>
         )}
         {work.tools && (
-          <div className="py-1.5 border-t border-b border-gray-100">
-            <p className="font-['Bahnschrift'] text-[5.5pt] opacity-40 tracking-widest uppercase mb-0.5">Tools Used</p>
-            <p className="font-['Mobo'] text-[6pt] opacity-70 tracking-wider leading-relaxed">{work.tools}</p>
+          <div className="py-2 border-t border-b border-gray-100">
+            <p className="font-['Bahnschrift'] text-[6pt] opacity-40 tracking-widest uppercase mb-1">Tools Used</p>
+            <p className="font-['Mobo'] text-[7.5pt] opacity-70 tracking-wider leading-relaxed">{work.tools}</p>
           </div>
         )}
         {isMusic && (
-          <div className="flex items-center gap-2 mt-0.5 text-[10pt] text-[#333333]/80">
+          <div className="flex items-center gap-4 text-[16pt]">
             {SNS_ICONS.map(({ key, Icon }) =>
               work[key as keyof Work] ? <span key={key} className="opacity-70"><Icon /></span> : null
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// PCプレビュー用コンテンツ（本番と同寸法で描画 → CSS scale で縮小）
+// 本番 work-slug ページ: 2カラムグリッド、text-[28pt]タイトルなど
+function PCWorkPreview({ work, imageUrl, isMusic }: {
+  work: Work; imageUrl: string | null; isMusic: boolean;
+}) {
+  const imgSrc = imageUrl || (work.filename ? `/images/${isMusic ? "MUSIC" : "DESIGN"} WORKS/${work.filename}` : null);
+  const category = isMusic ? "MUSIC / ALBUM DESIGN" : "DESIGN";
+  // 本番ページのレイアウト幅に合わせて描画し、scale(0.42) で縮小表示
+  // outer div で高さを固定してクリップ
+  const RENDER_WIDTH = 640;
+  const SCALE = 0.42;
+  return (
+    <div style={{ height: "340px", overflow: "hidden", position: "relative" }}>
+      <div style={{
+        width: `${RENDER_WIDTH}px`,
+        transform: `scale(${SCALE})`,
+        transformOrigin: "top left",
+        pointerEvents: "none",
+      }}>
+        <div className="grid grid-cols-2 gap-16 items-start text-[#333333]">
+          {/* 左: 画像 */}
+          <div className="w-full shadow-2xl bg-white border border-[#333333]/5 overflow-hidden">
+            {imgSrc ? (
+              <img src={imgSrc} alt={work.title} className="w-full h-auto object-contain"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            ) : (
+              <div className="w-full h-40 bg-gray-50 flex items-center justify-center">
+                <span className="text-sm opacity-30 font-['Bahnschrift']">NO IMAGE</span>
+              </div>
+            )}
+          </div>
+          {/* 右: テキスト */}
+          <div className="flex flex-col">
+            <h1 className="text-[28pt] font-['Mobo-bold'] leading-tight tracking-wider mb-4">
+              {work.title || "（タイトル未入力）"}
+            </h1>
+            <div className="font-['Bahnschrift'] text-[11pt] opacity-60 tracking-widest uppercase mb-10 border-b border-[#333333]/10 pb-2 w-fit">
+              {category}
+            </div>
+            {work.description && (
+              <div className="font-['Mobo'] text-[11.5pt] leading-relaxed opacity-80 tracking-wider mb-8">
+                {work.description}
+              </div>
+            )}
+            {work.tools && (
+              <div className="mb-10 py-6 border-t border-b border-[#333333]/5">
+                <p className="font-['Bahnschrift'] text-[9pt] opacity-40 tracking-[0.2em] mb-3 uppercase">Tools Used</p>
+                <p className="font-['Mobo'] text-[10.5pt] opacity-70 tracking-wider leading-relaxed">{work.tools}</p>
+              </div>
+            )}
+            {isMusic && (
+              <div className="flex items-center gap-8 mt-4 text-[28pt]">
+                {SNS_ICONS.map(({ key, Icon }) =>
+                  work[key as keyof Work] ? <span key={key} className="opacity-70"><Icon /></span> : null
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -749,29 +763,31 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
               </p>
             )}
 
-            {/* スマホモード: phone frame */}
+            {/* スマホモード: phone frame（固定サイズ・内部スクロール） */}
             {editingItem && isMobilePreview && (
-              <div className="mx-auto border-4 border-gray-800 rounded-[24px] overflow-hidden shadow-xl bg-white"
-                style={{ width: "220px" }}>
-                <div className="bg-gray-800 h-4 flex items-center justify-center">
-                  <div className="w-12 h-1 bg-gray-600 rounded-full" />
+              <div className="mx-auto border-4 border-gray-800 rounded-[28px] overflow-hidden shadow-xl bg-white"
+                style={{ width: "212px", height: "440px", display: "flex", flexDirection: "column" }}>
+                {/* ノッチ */}
+                <div className="bg-gray-800 shrink-0" style={{ height: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div className="bg-gray-600 rounded-full" style={{ width: "48px", height: "4px" }} />
                 </div>
-                <div className="overflow-y-auto p-3 bg-white" style={{ maxHeight: "400px" }}>
+                {/* コンテンツ（スクロール可能・高さ固定） */}
+                <div className="overflow-y-auto bg-white flex-1">
                   {previewWork && (
-                    <WorkDetailPreview work={previewWork} imageUrl={previewImageUrl}
-                      isMusic={activeTab === "music"} isMobile />
+                    <MobileWorkPreview work={previewWork} imageUrl={previewImageUrl}
+                      isMusic={activeTab === "music"} />
                   )}
-                  {previewNews && <NewsPreviewCard item={previewNews} />}
+                  {previewNews && <div className="p-3"><NewsPreviewCard item={previewNews} /></div>}
                 </div>
               </div>
             )}
 
-            {/* PCモード */}
+            {/* PCモード: 本番と同寸法で描画→scale縮小 */}
             {editingItem && !isMobilePreview && (
-              <div className="bg-gray-50 rounded-lg p-3 overflow-auto" style={{ maxHeight: "460px" }}>
+              <div className="bg-white border border-gray-100 rounded-lg p-3 overflow-hidden">
                 {previewWork && (
-                  <WorkDetailPreview work={previewWork} imageUrl={previewImageUrl}
-                    isMusic={activeTab === "music"} isMobile={false} />
+                  <PCWorkPreview work={previewWork} imageUrl={previewImageUrl}
+                    isMusic={activeTab === "music"} />
                 )}
                 {previewNews && <NewsPreviewCard item={previewNews} />}
               </div>

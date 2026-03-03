@@ -2,6 +2,7 @@
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaSoundcloud, FaYoutube } from "react-icons/fa6";
+import { SiNiconico, SiSpotify, SiApplemusic, SiAmazonmusic } from "react-icons/si";
 import { musicWorks, designWorks } from "@/lib/works";
 
 export default function WorkDetail() {
@@ -60,27 +61,39 @@ export default function WorkDetail() {
             {/* 🟢 【復活：使用ツール欄】
                 データ(lib/works.ts)に tools プロパティがある場合のみ表示
             */}
-            {(work as any).tools && (
+            {work.tools && (
               <div className="mb-12 py-6 border-t border-b border-[#333333]/5">
+                {/* Tools Used
+                    ラベル: font-['Bahnschrift'] / text-[9pt] / 文字間: tracking-[0.2em]
+                    本文: font-['Mobo'] / text-[10.5pt] / 文字間: tracking-wider */}
                 <p className="font-['Bahnschrift'] text-[9pt] opacity-40 tracking-[0.2em] mb-3 uppercase">Tools Used</p>
                 <p className="font-['Mobo'] text-[10.5pt] opacity-70 tracking-wider leading-relaxed">
-                  {(work as any).tools}
+                  {work.tools}
                 </p>
               </div>
             )}
 
-            {/* 【SNSアイコン】ヘッダーと共通の whileHover={{ scale: 1.1 }} */}
+            {/* 【SNSアイコン】
+                サイズ: text-[28pt] / 透明度: opacity-70（通常）→ hover:opacity-40
+                ホバー拡大: whileHover scale 1.1（無彩色のまま）
+                表示条件: URLが入力されているアイコンのみ表示 */}
             {isMusic && (
-              <div className="flex items-center gap-8 mt-4 text-[28pt] text-[#333333]/80">
-                {work.soundcloud && (
-                  <motion.a href={work.soundcloud} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff3300] transition-colors">
-                    <FaSoundcloud />
-                  </motion.a>
-                )}
-                {work.youtube && (
-                  <motion.a href={work.youtube} target="_blank" rel="noopener noreferrer" whileHover={{ scale: 1.1 }} className="hover:text-[#ff0000] transition-colors">
-                    <FaYoutube />
-                  </motion.a>
+              <div className="flex items-center gap-8 mt-4 text-[28pt]">
+                {([
+                  { key: "soundcloud", Icon: FaSoundcloud },
+                  { key: "youtube",    Icon: FaYoutube    },
+                  { key: "niconico",   Icon: SiNiconico   },
+                  { key: "spotify",    Icon: SiSpotify    },
+                  { key: "appleMusic", Icon: SiApplemusic },
+                  { key: "amazonMusic",Icon: SiAmazonmusic},
+                ] as const).map(({ key, Icon }) =>
+                  work[key] ? (
+                    <motion.a key={key} href={work[key]!} target="_blank" rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1 }}
+                      className="opacity-70 hover:opacity-40 transition-opacity">
+                      <Icon />
+                    </motion.a>
+                  ) : null
                 )}
               </div>
             )}
