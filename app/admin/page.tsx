@@ -9,7 +9,7 @@ import {
   useSortable, verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { FaSoundcloud, FaYoutube } from "react-icons/fa6";
+import { FaSoundcloud, FaYoutube, FaPlay } from "react-icons/fa6";
 import { SiNiconico, SiSpotify, SiApplemusic, SiAmazonmusic } from "react-icons/si";
 import { FiTrash2, FiUpload, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
@@ -349,6 +349,110 @@ function NewsPreviewCard({ item }: { item: News }) {
         <span className="font-['Bahnschrift'] opacity-70 text-xs tracking-widest">{item.date || "（日付未入力）"}</span>
         <span className="text-xs leading-relaxed tracking-wide">{item.content || "（内容未入力）"}</span>
         {item.link && <span className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 underline">Visit Link →</span>}
+      </div>
+    </div>
+  );
+}
+
+// プレイヤープレビュー（PC）: VisualizerStyle2 のPC横並びレイアウトを模倣
+function PlayerPreviewPC({ work, imageUrl }: { work: Work; imageUrl: string | null }) {
+  const imgSrc = imageUrl || (work.filename ? encodeURI(`/images/MUSIC WORKS/${work.filename}`) : null);
+  const RENDER_WIDTH = 700;
+  const SCALE = 0.58;
+  return (
+    <div>
+      <div style={{ width: `${RENDER_WIDTH}px`, zoom: SCALE, pointerEvents: "none" }}>
+        <div className="bg-white flex items-center gap-12 px-6 py-10">
+          {/* アートワーク */}
+          <div className="relative shrink-0 w-[280px] h-[280px] shadow-2xl bg-white">
+            {imgSrc ? (
+              <img src={imgSrc} alt={work.title} className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            ) : (
+              <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                <span className="text-sm opacity-30 font-['Bahnschrift']">NO IMAGE</span>
+              </div>
+            )}
+            {/* 再生ボタンオーバーレイ（常時表示） */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <FaPlay className="text-white text-5xl ml-2" />
+            </div>
+          </div>
+          {/* テキスト・コントロール */}
+          <div className="flex flex-col text-[#333333] flex-1">
+            <h2 className="text-[24pt] font-['Mobo-bold'] leading-tight tracking-wider mb-2">
+              {work.title || "（タイトル未入力）"}
+            </h2>
+            <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-10 uppercase">INAGA</p>
+            {/* シークバー（静的） */}
+            <div className="w-full mb-8 flex flex-col gap-2">
+              <div className="w-full h-[2px] bg-[#333333]/10 relative">
+                <div className="absolute left-0 top-0 h-full bg-[#333333]" style={{ width: "30%" }} />
+              </div>
+              <div className="flex justify-between font-['Bahnschrift'] text-[9pt] opacity-40">
+                <span>0:00</span>
+                <span>—:——</span>
+              </div>
+            </div>
+            {/* SNSアイコン */}
+            <div className="flex gap-6 text-[26px] mt-2">
+              {SNS_ICONS.map(({ key, Icon }) =>
+                work[key as keyof Work] ? (
+                  <span key={key} className="opacity-70"><Icon /></span>
+                ) : null
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// プレイヤープレビュー（スマホ）: VisualizerStyle2 のモバイル縦積みレイアウトを模倣
+function PlayerPreviewMobile({ work, imageUrl }: { work: Work; imageUrl: string | null }) {
+  const imgSrc = imageUrl || (work.filename ? encodeURI(`/images/MUSIC WORKS/${work.filename}`) : null);
+  return (
+    <div className="flex flex-col items-center gap-4 text-[#333333] py-4 px-3">
+      {/* アートワーク */}
+      <div className="relative w-[140px] h-[140px] shadow-2xl bg-white shrink-0">
+        {imgSrc ? (
+          <img src={imgSrc} alt={work.title} className="w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+        ) : (
+          <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+            <span className="text-xs opacity-30 font-['Bahnschrift']">NO IMAGE</span>
+          </div>
+        )}
+      </div>
+      {/* テキスト・コントロール */}
+      <div className="flex flex-col items-center w-full">
+        <h2 className="text-[12pt] font-['Mobo-bold'] leading-tight tracking-wider mb-1 text-center">
+          {work.title || "（タイトル未入力）"}
+        </h2>
+        <p className="text-[7pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-4 uppercase">INAGA</p>
+        {/* シークバー（静的） */}
+        <div className="w-full mb-3 flex flex-col gap-1">
+          <div className="w-full h-[2px] bg-[#333333]/10 relative">
+            <div className="absolute left-0 top-0 h-full bg-[#333333]" style={{ width: "30%" }} />
+          </div>
+          <div className="flex justify-between font-['Bahnschrift'] text-[7pt] opacity-40">
+            <span>0:00</span>
+            <span>—:——</span>
+          </div>
+        </div>
+        {/* 再生ボタン */}
+        <div className="flex justify-center mb-4">
+          <FaPlay className="text-[#333333] text-[20pt] ml-1" />
+        </div>
+        {/* SNSアイコン */}
+        <div className="flex gap-4 text-[18px]">
+          {SNS_ICONS.map(({ key, Icon }) =>
+            work[key as keyof Work] ? (
+              <span key={key} className="opacity-70"><Icon /></span>
+            ) : null
+          )}
+        </div>
       </div>
     </div>
   );
@@ -919,9 +1023,12 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                 </div>
                 {/* コンテンツ（スクロール可能・高さ固定） */}
                 <div className="overflow-y-auto bg-white flex-1">
-                  {previewWork && (
+                  {previewWork && activeTab === "player" && (
+                    <PlayerPreviewMobile work={previewWork} imageUrl={previewImageUrl} />
+                  )}
+                  {previewWork && activeTab !== "player" && (
                     <MobileWorkPreview work={previewWork} imageUrl={previewImageUrl}
-                      isMusic={activeTab === "music" || activeTab === "player"} />
+                      isMusic={activeTab === "music"} />
                   )}
                   {previewNews && <div className="p-3"><NewsPreviewCard item={previewNews} /></div>}
                 </div>
@@ -931,9 +1038,12 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             {/* PCモード: 本番と同寸法で描画→scale縮小 */}
             {(previewWork || previewNews) && !isMobilePreview && (
               <div className="bg-white border border-gray-100 rounded-lg p-3 overflow-hidden">
-                {previewWork && (
+                {previewWork && activeTab === "player" && (
+                  <PlayerPreviewPC work={previewWork} imageUrl={previewImageUrl} />
+                )}
+                {previewWork && activeTab !== "player" && (
                   <PCWorkPreview work={previewWork} imageUrl={previewImageUrl}
-                    isMusic={activeTab === "music" || activeTab === "player"} />
+                    isMusic={activeTab === "music"} />
                 )}
                 {previewNews && <NewsPreviewCard item={previewNews} />}
               </div>
@@ -1109,5 +1219,5 @@ export default function AdminPage() {
 
   if (!checked) return null;
   if (!password) return <LoginScreen onLogin={(pw) => { setPassword(pw); }} />;
-  return <AdminDashboard password={password} onLogout={() => { sessionStorage.removeItem("admin_password"); setPassword(null); }} />;
+  return <AdminDashboard password={password} onLogout={() => { sessionStorage.removeItem("admin_password"); setPassword(null); window.location.href = "/"; }} />;
 }
