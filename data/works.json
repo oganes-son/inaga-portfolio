@@ -143,11 +143,11 @@
   ],
   "designWorks": [
     {
-      "id": 1,
-      "slug": "aquarhythm",
-      "filename": "AQUARHYTHM.png",
-      "title": "AQUARHYTHM",
-      "description": "第66回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「AQUARHYTHM」のジャケットイラスト。",
+      "id": 3,
+      "slug": "harmonite",
+      "filename": "HARMONITE.png",
+      "title": "HARMONITE",
+      "description": "第67回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「HARMONITE」のジャケットイラスト。",
       "tools": "Blender, Affinity"
     },
     {
@@ -159,27 +159,27 @@
       "tools": "Affinity"
     },
     {
-      "id": 2,
-      "slug": "colorful-smoke",
-      "filename": "COLORFUL SMOKE.png",
-      "title": "COLORFUL SMOKE",
-      "description": "「煙」をモチーフに作成したグラフィックデザイン。",
-      "tools": "Affinity"
-    },
-    {
-      "id": 3,
-      "slug": "harmonite",
-      "filename": "HARMONITE.png",
-      "title": "HARMONITE",
-      "description": "第67回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「HARMONITE」のジャケットイラスト。",
-      "tools": "Blender, Affinity"
-    },
-    {
       "id": 5,
       "slug": "reconst",
       "filename": "RECONST.png",
       "title": "RECONST",
       "description": "「再構成」をテーマに作成したグラフィックデザイン。",
+      "tools": "Affinity"
+    },
+    {
+      "id": 7,
+      "slug": "nengajo-2026",
+      "filename": "nengajo.png",
+      "title": "年賀状2026",
+      "description": "2026年の年賀状。",
+      "tools": "Affinity"
+    },
+    {
+      "id": 2,
+      "slug": "colorful-smoke",
+      "filename": "COLORFUL SMOKE.png",
+      "title": "COLORFUL SMOKE",
+      "description": "「煙」をモチーフに作成したグラフィックデザイン。",
       "tools": "Affinity"
     },
     {
@@ -191,12 +191,12 @@
       "tools": "Affinity"
     },
     {
-      "id": 7,
-      "slug": "nengajo-2026",
-      "filename": "nengajo.png",
-      "title": "年賀状2026",
-      "description": "2026年の年賀状。",
-      "tools": "Affinity"
+      "id": 1,
+      "slug": "aquarhythm",
+      "filename": "AQUARHYTHM.png",
+      "title": "AQUARHYTHM",
+      "description": "第66回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「AQUARHYTHM」のジャケットイラスト。",
+      "tools": "Blender, Affinity"
     }
   ],
   "newsData": [
