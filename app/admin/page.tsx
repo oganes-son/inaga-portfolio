@@ -971,7 +971,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
           )}
           <button onClick={onLogout}
             className="text-xs font-['Bahnschrift'] tracking-widest text-gray-500 hover:text-gray-800 border border-gray-200 px-3 py-1.5 rounded hover:border-gray-400 transition-colors">
-            LOGOUT
+            BACK TO SITE
           </button>
         </div>
       </header>
@@ -1015,7 +1015,6 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             {/* SEO タブ: SERP スニペットプレビュー */}
             {activeTab === "seo" && worksData && (
               <div className="flex flex-col gap-2">
-                <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase mb-1">Google 検索プレビュー</p>
                 <div className="border border-gray-200 rounded-lg p-3 bg-white text-left">
                   <p className="text-[10px] text-gray-400 font-['Bahnschrift'] truncate mb-0.5">https://inagainaga.vercel.app</p>
                   <p className="text-[13px] text-blue-700 font-medium leading-tight mb-1 line-clamp-2">
@@ -1117,9 +1116,6 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                 />
               </div>
 
-              <p className="text-xs opacity-40 font-['Mobo'] leading-relaxed">
-                変更後は右上の「全てコミット」でGitHubに反映してください。反映にはVercelの再ビルド（1〜2分）が必要です。
-              </p>
             </div>
           ) : activeTab === "player" ? (
             /* ── PLAYER タブ ── */
