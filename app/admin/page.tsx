@@ -933,6 +933,19 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   const previewNews = activeTab === "news"
     ? (editingItem ? (editingItem as News) : defaultPreviewNews)
     : null;
+  // NEWSタブ: 全件プレビュー用リスト（編集中の項目は editingItem で上書き）
+  const previewNewsList: { item: News; isEditing: boolean }[] =
+    activeTab === "news" && worksData
+      ? [
+          ...(isNewItem && editingItem ? [{ item: editingItem as News, isEditing: true }] : []),
+          ...worksData.newsData.map((item, i) => ({
+            item: editingIndex === i && !isNewItem && editingItem
+              ? (editingItem as News)
+              : item,
+            isEditing: editingIndex === i && !isNewItem,
+          })),
+        ]
+      : [];
   const isMobilePreview = previewMode === "mobile";
 
   const imageProps: ImageUploadProps = {
@@ -1034,7 +1047,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             )}
 
             {/* スマホモード: phone frame（固定サイズ・内部スクロール） */}
-            {(previewWork || previewNews) && isMobilePreview && activeTab !== "seo" && (
+            {(previewWork || activeTab === "news") && isMobilePreview && activeTab !== "seo" && (
               <div className="mx-auto border-4 border-gray-800 rounded-[28px] overflow-hidden shadow-xl bg-white"
                 style={{ width: "212px", height: "440px", display: "flex", flexDirection: "column" }}>
                 {/* ノッチ */}
@@ -1050,13 +1063,21 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                     <MobileWorkPreview work={previewWork} imageUrl={previewImageUrl}
                       isMusic={activeTab === "music"} />
                   )}
-                  {previewNews && <div className="p-3"><NewsPreviewCard item={previewNews} /></div>}
+                  {activeTab === "news" && (
+                    <div className="p-3 flex flex-col gap-2">
+                      {previewNewsList.map((entry, i) => (
+                        <div key={i} className={entry.isEditing ? "ring-2 ring-blue-400 ring-offset-1 rounded-xl" : ""}>
+                          <NewsPreviewCard item={entry.item} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
             {/* PCモード: 本番と同寸法で描画→scale縮小 */}
-            {(previewWork || previewNews) && !isMobilePreview && activeTab !== "seo" && (
+            {(previewWork || activeTab === "news") && !isMobilePreview && activeTab !== "seo" && (
               <div className="bg-white border border-gray-100 rounded-lg p-3 overflow-y-auto max-h-[480px]">
                 {previewWork && activeTab === "player" && (
                   <PlayerPreviewPC work={previewWork} imageUrl={previewImageUrl} />
@@ -1065,7 +1086,15 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                   <PCWorkPreview work={previewWork} imageUrl={previewImageUrl}
                     isMusic={activeTab === "music"} />
                 )}
-                {previewNews && <NewsPreviewCard item={previewNews} />}
+                {activeTab === "news" && (
+                  <div className="flex flex-col gap-2">
+                    {previewNewsList.map((entry, i) => (
+                      <div key={i} className={entry.isEditing ? "ring-2 ring-blue-400 ring-offset-1 rounded-xl" : ""}>
+                        <NewsPreviewCard item={entry.item} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

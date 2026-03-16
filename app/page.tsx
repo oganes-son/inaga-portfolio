@@ -234,27 +234,26 @@ export default function Home() {
             ──────────────────────────────────────────── */}
         <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-4 md:scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">NEWS</h2>
-          <div className="bg-white rounded-2xl shadow-sm border border-[#333333]/5 overflow-hidden">
-            <div className="max-h-[300px] overflow-y-auto p-8 space-y-6">
-              {newsData.map((item, index) => (
-                <div key={index} className="flex flex-col md:flex-row md:gap-8 border-b border-[#333333]/10 pb-4 last:border-0 font-['Mobo']">
-                  {/* 日付
-                      フォント: font-['Bahnschrift'] / サイズ: text-[9.5pt](スマホ) md:text-[10pt](PC)
-                      文字間: tracking-widest / 透明度: opacity-70 */}
-                  <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[9.5pt] md:text-[10pt] shrink-0">{item.date}</span>
-                  <div className="flex flex-col gap-2">
-                    {/* ニュース本文
-                        フォント: font-['Mobo']（親から継承）
-                        サイズ: text-[9.5pt](スマホ) / md:text-[12.2pt](PC)
-                        行間: leading-[2.1] / 文字間: tracking-[0.12em] */}
-                    <span className="text-[9.5pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em tracking-wider">{item.content}</span>
-                    {item.link && (
-                      <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[9pt] font-['Bahnschrift'] tracking-widest opacity-50 hover:opacity-100 underline underline-offset-4 transition-opacity w-fit uppercase">Visit Link →</a>
-                    )}
-                  </div>
+          <div className="space-y-6 pb-16 relative">
+            {newsData.slice(0, 3).map((item, index) => (
+              <div key={index} className="flex flex-col md:flex-row md:gap-8 border-b border-[#333333]/10 pb-6 last:border-0 font-['Mobo']">
+                <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[9.5pt] md:text-[10pt] shrink-0">{item.date}</span>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[9.5pt] md:text-[12.2pt] leading-[2.1] tracking-[0.12em]">{item.content}</span>
+                  {item.link && (
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[9pt] font-['Bahnschrift'] tracking-widest opacity-50 hover:opacity-100 underline underline-offset-4 transition-opacity w-fit uppercase">Visit Link →</a>
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+            {newsData.length > 3 && (
+              <motion.a href="/news" className="absolute -bottom-2 right-0 z-30 group flex flex-col items-end">
+                <div className="flex items-center gap-2 font-['Bahnschrift'] text-[9.5pt] tracking-[0.2em] text-[#333333]/60 group-hover:text-[#333333] transition-colors duration-300 uppercase">
+                  VIEW ALL <span className="text-[12pt] mb-0.5">→</span>
+                </div>
+                <motion.div className="h-[1px] bg-[#333333] w-full origin-right" initial={{ scaleX: 0 }} whileHover={{ scaleX: 1 }} transition={{ duration: 0.3 }} />
+              </motion.a>
+            )}
           </div>
         </section>
 
