@@ -143,6 +143,14 @@
   ],
   "designWorks": [
     {
+      "id": 8,
+      "slug": "plantone",
+      "filename": "ジャケットいなが案1.png",
+      "title": "PLANTONE",
+      "description": "2025年秋M3にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「PLANTONE」のジャケットイラスト。",
+      "tools": "Blender, Affinity"
+    },
+    {
       "id": 3,
       "slug": "harmonite",
       "filename": "HARMONITE.png",
