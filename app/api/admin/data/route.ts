@@ -5,6 +5,7 @@ const FILE_PATH = "data/works.json";
 const BRANCH = "main";
 
 function checkAuth(request: NextRequest) {
+  if (process.env.NODE_ENV === "development") return true;
   const auth = request.headers.get("Authorization");
   return auth === `Bearer ${process.env.ADMIN_PASSWORD}`;
 }

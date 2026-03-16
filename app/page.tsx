@@ -9,10 +9,41 @@ import { VisualizerStyle2 } from '@/components/VisualizerStyle2';
 /* --- 共通パーツ (AnimatedLink, ContactLink, HorizontalScrollGalleryなどは以前のまま維持) --- */
 /* 省略：前回の回答のパーツ定義部分をそのまま使用してください */
 
+function animateScroll(targetY: number) {
+  const startY = window.scrollY;
+  const diff = targetY - startY;
+  const duration = Math.min(Math.abs(diff) * 0.12, 500);
+  const startTime = performance.now();
+  // 前半80%は等速、後半20%だけ緩やかに減速
+  const ease = (t: number) => {
+    if (t < 0.8) return (t / 0.8) * 0.88;
+    const p = (t - 0.8) / 0.2;
+    return 0.88 + 0.12 * (1 - Math.pow(1 - p, 2));
+  };
+  const step = (now: number) => {
+    const t = Math.min((now - startTime) / duration, 1);
+    window.scrollTo(0, startY + diff * ease(t));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function smoothScrollTo(targetId: string) {
+  const el = document.querySelector(targetId);
+  if (!el) return;
+  const headerOffset = window.innerWidth >= 768 ? 96 : 16;
+  animateScroll(el.getBoundingClientRect().top + window.scrollY - headerOffset);
+}
+
 function AnimatedLink({ href, text, onClick }: { href: string; text: string; onClick?: () => void }) {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onClick?.();
+    smoothScrollTo(href);
+  };
   return (
-    <motion.a 
-      href={href} onClick={onClick} initial="initial" whileHover="hover" 
+    <motion.a
+      href={href} onClick={handleClick} initial="initial" whileHover="hover"
       className="relative group text-[#333333] font-['Bahnschrift'] text-[12.2pt] tracking-widest px-2 py-1 flex flex-col items-center cursor-pointer"
     >
       <motion.span variants={{ initial: { scale: 1 }, hover: { scale: 1.1 } }}>{text}</motion.span>
@@ -122,8 +153,8 @@ export default function Home() {
       
       {/* ヘッダー */}
       <header className="fixed top-0 left-0 w-full h-20 z-[100] flex items-center justify-between px-6 md:px-10 overflow-hidden">
-        <motion.div animate={{ opacity: showHeaderBg ? 1 : 0 }} className="hidden md:block absolute inset-0 z-[-2]" style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }} />
-        <motion.div animate={{ opacity: showHeaderBg ? 0.7 : 0 }} className="hidden md:block absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm" />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: showHeaderBg ? 1 : 0 }} className="hidden md:block absolute inset-0 z-[-2]" style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }} />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: showHeaderBg ? 0.7 : 0 }} className="hidden md:block absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm" />
         <nav className="hidden md:flex gap-8 items-center h-full">
           <AnimatedLink href="#about" text="ABOUT" />
           <AnimatedLink href="#works" text="WORKS" />
@@ -163,21 +194,13 @@ export default function Home() {
 
       <div className="relative z-10">
 
-        {/* 🟢 ファーストビュー：スマホでは高さ制限を解除 (h-auto) し、画像の高さなりに表示 */}
+        {/* ファーストビュー */}
         <main className="h-auto md:min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full flex items-center justify-center">
+          <div className="w-full flex items-center justify-center">
             <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
             <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover" />
-          </motion.div>
+          </div>
         </main>
-        
-        {/* メインロゴ */}
-        {/* <main className="min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, ease: "easeOut" }} className="w-full flex items-center justify-center">
-            <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
-            <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover" />
-          </motion.div>
-        </main> */}
 
         {/* 🟢 ABOUT ─────────────────────────────────────────
             scroll-mt-4:  スマホ時のアンカー上余白 (4 = 16px)
@@ -283,22 +306,14 @@ export default function Home() {
       {/* フッター */}
       <footer className="bg-[#333333] text-white py-24 flex flex-col items-center gap-10">
         <nav className="flex flex-wrap justify-center gap-8 text-[10pt] md:text-[12.2pt]">
-          <motion.a href="#about" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
-            ABOUT
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
-          </motion.a>
-          <motion.a href="#works" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
-            WORKS
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
-          </motion.a>
-          <motion.a href="#news" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
-            NEWS
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
-          </motion.a>
-          <motion.a href="#contact" initial="initial" whileHover="hover" className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
-            CONTACT
-            <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
-          </motion.a>
+          {(["#about", "#works", "#news", "#contact"] as const).map((id) => (
+            <motion.a key={id} href={id} onClick={(e) => { e.preventDefault(); smoothScrollTo(id); }}
+              initial="initial" whileHover="hover"
+              className="relative font-['Bahnschrift'] tracking-widest px-2 py-1 flex flex-col items-center">
+              {id.slice(1).toUpperCase()}
+              <motion.span variants={{ initial: { scaleX: 0 }, hover: { scaleX: 1 } }} transition={{ duration: 0.2 }} className="absolute -bottom-1 w-full h-[2px] bg-white origin-center" />
+            </motion.a>
+          ))}
         </nav>
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
           <a href="/admin" className="no-underline hover:opacity-100 transition-opacity">© 2026</a>{" "}INAGA | DEVELOPED BY{" "}
@@ -306,7 +321,7 @@ export default function Home() {
             OGANESSON
           </a>
         </div>
-        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none" title="BACK TO TOP">
+        <button onClick={() => animateScroll(0)} className="cursor-pointer hover:opacity-80 transition-opacity focus:outline-none" title="BACK TO TOP">
           <img src={encodeURI("/images/footer_logo.png")} alt="BACK TO TOP" className="max-w-[200px] w-full px-6 opacity-60" />
         </button>
       </footer>

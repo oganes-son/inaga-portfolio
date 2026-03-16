@@ -46,7 +46,7 @@ export default function WorkDetail() {
 
             {/* 【カテゴリラベル】Music/Album Design または Design */}
             <div className="font-['Bahnschrift'] text-[11pt] md:text-[12pt] opacity-60 tracking-widest uppercase mb-12 border-b border-[#333333]/10 pb-2 w-fit">
-              {isMusic ? 'MUSIC / ALBUM DESIGN' : 'DESIGN'}
+              {isMusic ? 'MUSIC' : 'DESIGN'}
             </div>
 
             {/* 🟢 【解説文】

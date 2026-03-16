@@ -209,5 +209,9 @@
   "playerTrack": {
     "slug": "purify",
     "mp3Filename": "Purify.mp3"
+  },
+  "seoData": {
+    "title": "いなが | 音楽・グラフィックデザイン ポートフォリオ",
+    "description": "札幌在住のクリエイター「いなが」の公式ポートフォリオ。楽曲制作（Purify, Paradigm Shift など）やグラフィックデザイン作品を公開中。"
   }
 }

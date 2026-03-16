@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { seoData } from "@/lib/works";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,14 +18,12 @@ const BASE_URL = "https://inagainaga.vercel.app";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
-  // タイトル: 「いなが」を先頭に置き日本語検索に強くする
+  // タイトル・説明文: data/works.json の seoData から読み込み
   title: {
-    default: "いなが | 音楽・グラフィックデザイン ポートフォリオ",
+    default: seoData.title,
     template: "%s | いなが",
   },
-
-  // 説明文: 検索結果のスニペットに使われる（120文字以内推奨）
-  description: "札幌在住のクリエイター「いなが」の公式ポートフォリオ。楽曲制作（Purify, Paradigm Shift など）やグラフィックデザイン作品を公開中。",
+  description: seoData.description,
 
   // キーワード: 検索エンジンへのヒント（過剰にならないよう厳選）
   keywords: ["いなが", "いなが 音楽", "INAGA", "音楽クリエイター", "楽曲制作", "グラフィックデザイン", "ポートフォリオ", "札幌", "北海道大学", "Purify", "Paradigm Shift"],
@@ -40,8 +39,8 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: "いなが Portfolio",
     locale: "ja_JP",
-    title: "いなが | 音楽・グラフィックデザイン ポートフォリオ",
-    description: "札幌在住のクリエイター「いなが」の公式ポートフォリオ。楽曲制作やグラフィックデザイン作品を公開中。",
+    title: seoData.title,
+    description: seoData.description,
     images: [
       {
         url: "/images/top_logo.png",
@@ -56,8 +55,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@inaga_P",
-    title: "いなが | 音楽・グラフィックデザイン ポートフォリオ",
-    description: "札幌在住のクリエイター「いなが」の公式ポートフォリオ。楽曲制作やグラフィックデザイン作品を公開中。",
+    title: seoData.title,
+    description: seoData.description,
     images: ["/images/top_logo.png"],
   },
 
