@@ -31,8 +31,15 @@ export type SeoData = {
   description: string;
 };
 
+export type DesignNote = {
+  id: number;
+  title: string;
+  content: string;
+};
+
 export const musicWorks: Work[] = worksData.musicWorks;
 export const designWorks: Work[] = worksData.designWorks;
 export const newsData: News[] = worksData.newsData;
 export const playerTrack: PlayerTrack = worksData.playerTrack;
 export const seoData: SeoData = worksData.seoData;
+export const designNotes: DesignNote[] = worksData.designNotes;

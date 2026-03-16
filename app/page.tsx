@@ -292,7 +292,7 @@ export default function Home() {
           </motion.a>
         </nav>
         <div className="text-[8pt] font-['Bahnschrift'] opacity-50 tracking-[0.3em] text-center px-6 uppercase leading-loose">
-          <a href="/admin" className="no-underline hover:opacity-100 transition-opacity">© 2026</a>{" "}INAGA | DEVELOPED BY{" "}
+          <a href="/admin" className="no-underline hover:opacity-100 transition-opacity">© 2026</a>{" "}INAGA | <a href="/design-notes" className="no-underline hover:opacity-100 transition-opacity">DEVELOPED</a> BY{" "}
           <a href="https://github.com/oganes-son" target="_blank" rel="noopener noreferrer" className="no-underline hover:opacity-100 transition-opacity">
             OGANESSON
           </a>
