@@ -164,11 +164,9 @@ export default function Home() {
       <div className="relative z-10">
 
         {/* ファーストビュー */}
-        <main className="h-auto md:min-h-screen w-full flex flex-col justify-start md:justify-center items-center bg-white overflow-hidden">
-          <div className="w-full flex items-center justify-center">
-            <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
-            <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-auto object-cover" />
-          </div>
+        <main className="h-auto md:h-screen w-full overflow-hidden">
+          <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
+          <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-full object-cover object-top" />
         </main>
 
         {/* 🟢 ABOUT ─────────────────────────────────────────
@@ -234,7 +232,8 @@ export default function Home() {
             ──────────────────────────────────────────── */}
         <section id="news" className="max-w-4xl mx-auto py-[60px] px-6 min-h-[40vh] flex flex-col justify-center text-left scroll-mt-4 md:scroll-mt-24">
           <h2 className="text-[21.3pt] font-['Bahnschrift'] font-normal mb-8 tracking-widest uppercase">NEWS</h2>
-          <div className="space-y-6 pb-16 relative">
+          <div className="bg-white rounded-2xl shadow-sm border border-[#333333]/5 overflow-hidden">
+          <div className="p-8 space-y-6 pb-16 relative">
             {newsData.slice(0, 3).map((item, index) => (
               <div key={index} className="flex flex-col md:flex-row md:gap-8 border-b border-[#333333]/10 pb-6 last:border-0 font-['Mobo']">
                 <span className="font-['Bahnschrift'] opacity-70 w-32 tracking-widest text-[9.5pt] md:text-[10pt] shrink-0">{item.date}</span>
@@ -254,6 +253,7 @@ export default function Home() {
                 <motion.div className="h-[1px] bg-[#333333] w-full origin-right" initial={{ scaleX: 0 }} whileHover={{ scaleX: 1 }} transition={{ duration: 0.3 }} />
               </motion.a>
             )}
+          </div>
           </div>
         </section>
 
