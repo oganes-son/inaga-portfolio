@@ -47,7 +47,7 @@ const TYPOGRAPHY = [
     note: "class: font-['Mobo']",
     role: "本文日本語",
     spec: "leading-[2.1]",
-    sample: "制作のこだわりや背景をここに記述します。読みやすさを重視した行間設定。",
+    sample: "自己紹介や作品詳細ページの本文に使用。",
     className: "font-['Mobo'] text-[11pt] leading-[2.1] text-[#333333]",
   },
   {
@@ -325,22 +325,100 @@ export default function DesignNotesPage() {
         {/* ── 3. レイアウト ── */}
         <section>
           <SectionHeading>LAYOUT</SectionHeading>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { label: "MAX WIDTH", value: "max-w-4xl", sub: "896px" },
-              { label: "PADDING", value: "px-6", sub: "24px" },
-              { label: "BREAKPOINT", value: "md", sub: "768px" },
-            ].map((item) => (
-              <div key={item.label} className="border border-[#333333]/10 p-5">
-                <p className="font-['Bahnschrift'] text-[6.5pt] tracking-[0.3em] opacity-40 uppercase mb-2">
-                  {item.label}
-                </p>
-                <p className="font-['Bahnschrift'] text-[13pt] tracking-wide text-[#333333] mb-1">
-                  {item.value}
-                </p>
-                <p className="font-['Mobo'] text-[8pt] opacity-40">{item.sub}</p>
+
+          {/* ページ構造ダイアグラム */}
+          <div className="w-full overflow-x-auto">
+            <div className="min-w-[520px]">
+
+              {/* ── ブラウザ幅（viewport）── */}
+              <div className="relative border border-dashed border-[#333333]/20 bg-[#333333]/[0.02] py-6 px-3">
+
+                {/* viewport ラベル */}
+                <div className="absolute -top-3 left-3 bg-white px-2">
+                  <span className="font-['Bahnschrift'] text-[6.5pt] tracking-[0.2em] opacity-30 uppercase">viewport（全幅）</span>
+                </div>
+
+                {/* ── max-w-4xl コンテンツ幅 ── */}
+                <div className="relative max-w-[480px] mx-auto border border-dashed border-[#333333]/30 bg-white">
+
+                  {/* max-width 矢印ラベル（上） */}
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-0 whitespace-nowrap">
+                    <div className="w-3 h-px bg-[#333333]/40" />
+                    <span className="font-['Bahnschrift'] text-[6.5pt] tracking-[0.15em] opacity-50 uppercase px-1.5 bg-white">max-w-4xl — 896px</span>
+                    <div className="w-3 h-px bg-[#333333]/40" />
+                  </div>
+
+                  {/* ── px-6 パディング ── */}
+                  <div className="relative flex items-stretch">
+
+                    {/* 左パディング */}
+                    <div className="relative w-6 shrink-0 bg-[#333333]/[0.06] flex items-center justify-center">
+                      <span className="font-['Bahnschrift'] text-[5.5pt] tracking-tight opacity-40 [writing-mode:vertical-rl] rotate-180">px-6</span>
+                      {/* 左側の寸法線 */}
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 flex flex-col items-center gap-0.5">
+                        <div className="w-px h-3 bg-[#333333]/30" />
+                        <div className="w-2 h-px bg-[#333333]/30" />
+                      </div>
+                    </div>
+
+                    {/* コンテンツエリア */}
+                    <div className="flex-1 py-4 px-2 flex flex-col gap-2">
+                      {/* ダミーコンテンツ */}
+                      <div className="font-['Bahnschrift'] text-[6pt] tracking-[0.3em] opacity-30 uppercase mb-1">ABOUT</div>
+                      <div className="h-2 bg-[#333333]/10 rounded-full w-3/4" />
+                      <div className="h-2 bg-[#333333]/10 rounded-full w-full" />
+                      <div className="h-2 bg-[#333333]/10 rounded-full w-5/6" />
+                      <div className="h-2 bg-[#333333]/10 rounded-full w-2/3" />
+                    </div>
+
+                    {/* 右パディング */}
+                    <div className="relative w-6 shrink-0 bg-[#333333]/[0.06] flex items-center justify-center">
+                      <span className="font-['Bahnschrift'] text-[5.5pt] tracking-tight opacity-40 [writing-mode:vertical-rl]">px-6</span>
+                    </div>
+
+                  </div>
+
+                  {/* 左右パディング 寸法ラベル（下） */}
+                  <div className="flex items-center justify-between px-0 pb-1 pt-0.5">
+                    <div className="flex items-center gap-1">
+                      <div className="h-px w-6 bg-[#333333]/30" />
+                      <span className="font-['Bahnschrift'] text-[6pt] opacity-30 uppercase tracking-tight">24px</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-['Bahnschrift'] text-[6pt] opacity-30 uppercase tracking-tight">24px</span>
+                      <div className="h-px w-6 bg-[#333333]/30" />
+                    </div>
+                  </div>
+
+                </div>{/* /max-w-4xl */}
+              </div>{/* /viewport */}
+
+              {/* ── ブレークポイント図（横幅比較）── */}
+              <div className="mt-8 flex flex-col gap-2">
+                <span className="font-['Bahnschrift'] text-[6.5pt] tracking-[0.3em] opacity-40 uppercase">BREAKPOINT</span>
+
+                {/* SP: 768px未満 */}
+                <div className="flex items-center gap-3">
+                  <span className="font-['Bahnschrift'] text-[6.5pt] opacity-30 w-20 shrink-0 text-right">＜ 768px</span>
+                  <div className="relative h-5 bg-[#333333]/8 border border-dashed border-[#333333]/20 flex items-center justify-center" style={{ width: "45%" }}>
+                    <span className="font-['Bahnschrift'] text-[6pt] tracking-widest opacity-30">MOBILE</span>
+                  </div>
+                  <span className="font-['Bahnschrift'] text-[6.5pt] opacity-30">1カラム・フォントS</span>
+                </div>
+
+                {/* PC: 768px以上 */}
+                <div className="flex items-center gap-3">
+                  <span className="font-['Bahnschrift'] text-[6.5pt] opacity-30 w-20 shrink-0 text-right">≥ 768px</span>
+                  <div className="relative h-5 bg-[#333333]/8 border border-dashed border-[#333333]/20 flex items-center justify-center" style={{ width: "80%" }}>
+                    <div className="absolute left-0 top-0 bottom-0 border-r-2 border-[#333333]/30" style={{ left: "56.25%" }} />
+                    <span className="font-['Bahnschrift'] text-[6pt] tracking-widest opacity-30">DESKTOP</span>
+                  </div>
+                  <span className="font-['Bahnschrift'] text-[6.5pt] opacity-30">2カラム・フォントL</span>
+                </div>
+
               </div>
-            ))}
+
+            </div>
           </div>
         </section>
 
