@@ -143,27 +143,27 @@
   ],
   "designWorks": [
     {
-      "id": 8,
-      "slug": "plantone",
-      "filename": "ジャケットいなが案1.png",
-      "title": "PLANTONE",
-      "description": "2025年秋M3にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「PLANTONE」のジャケットイラスト。",
-      "tools": "Blender, Affinity"
-    },
-    {
-      "id": 3,
-      "slug": "harmonite",
-      "filename": "HARMONITE.png",
-      "title": "HARMONITE",
-      "description": "第67回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「HARMONITE」のジャケットイラスト。",
-      "tools": "Blender, Affinity"
-    },
-    {
       "id": 4,
       "slug": "lunar-prober",
       "filename": "LUNAR PROBER.png",
       "title": "LUNAR PROBER",
       "description": "「月面探査」をテーマに作成したグラフィックデザイン。",
+      "tools": "Affinity"
+    },
+    {
+      "id": 10,
+      "slug": "cast-a-shadow",
+      "filename": "cast a shadow.png",
+      "title": "Cast a shadow",
+      "description": "「影」をテーマに作成したグラフィックデザイン。",
+      "tools": "Affinity"
+    },
+    {
+      "id": 2,
+      "slug": "colorful-smoke",
+      "filename": "COLORFUL SMOKE.png",
+      "title": "COLORFUL SMOKE",
+      "description": "「煙」をモチーフに作成したグラフィックデザイン。",
       "tools": "Affinity"
     },
     {
@@ -183,14 +183,6 @@
       "tools": "Affinity"
     },
     {
-      "id": 2,
-      "slug": "colorful-smoke",
-      "filename": "COLORFUL SMOKE.png",
-      "title": "COLORFUL SMOKE",
-      "description": "「煙」をモチーフに作成したグラフィックデザイン。",
-      "tools": "Affinity"
-    },
-    {
       "id": 6,
       "slug": "outen",
       "filename": "outen.png",
@@ -204,6 +196,38 @@
       "filename": "AQUARHYTHM.png",
       "title": "AQUARHYTHM",
       "description": "第66回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「AQUARHYTHM」のジャケットイラスト。",
+      "tools": "Blender, Affinity"
+    },
+    {
+      "id": 11,
+      "slug": "36",
+      "filename": "顕微鏡ポスター.png",
+      "title": "第36回顕微鏡サマースクール",
+      "description": "日本顕微鏡学会主催の、「第36回顕微鏡サマースクール」の宣伝ポスター。\n",
+      "tools": "Affinity"
+    },
+    {
+      "id": 9,
+      "slug": "umwelt",
+      "filename": "umweltメインデザイ縦ン.png",
+      "title": "UMWELT",
+      "description": "NoMaps2025にて展示した、北大ロボットアーキテクト「UMWELT -名前のない世界-」のプロジェクトの一部に参加した際の作品。オリジナルゲームのモデリング、楽曲制作を担当した。",
+      "tools": "Blender, Affinity"
+    },
+    {
+      "id": 3,
+      "slug": "harmonite",
+      "filename": "HARMONITE.png",
+      "title": "HARMONITE",
+      "description": "第67回楡陵祭にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「HARMONITE」のジャケットイラスト。",
+      "tools": "Blender, Affinity"
+    },
+    {
+      "id": 8,
+      "slug": "plantone",
+      "filename": "ジャケットいなが案1.png",
+      "title": "PLANTONE",
+      "description": "2025年秋M3にて頒布した、北大DTMサークルNMPASSのオリジナルアルバム「PLANTONE」のジャケットイラスト。",
       "tools": "Blender, Affinity"
     }
   ],
