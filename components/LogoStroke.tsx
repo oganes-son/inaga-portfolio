@@ -52,9 +52,9 @@ export function LogoStroke({
 
         {/* 案4: 対角グラデーション */}
         <linearGradient id="lg-logo" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#0C3347" />
-          <stop offset="50%"  stopColor="#031D2A" />
-          <stop offset="100%" stopColor="#010D14" />
+          <stop offset="0%"   stopColor="#000000" />
+          <stop offset="50%"  stopColor="#000000" />
+          <stop offset="100%" stopColor="#000000" />
         </linearGradient>
 
         <filter id="fx-logo" x="-2%" y="-2%" width="104%" height="104%" colorInterpolationFilters="sRGB">
