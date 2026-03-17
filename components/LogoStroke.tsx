@@ -36,9 +36,11 @@ export function LogoStroke({
   style?: React.CSSProperties;
 }) {
   const [active, setActive] = useState(false);
+  const [logoVisible, setLogoVisible] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setActive(true), 100);
-    return () => clearTimeout(t);
+    const t1 = setTimeout(() => setActive(true), 100);
+    const t2 = setTimeout(() => setLogoVisible(true), 2350);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   return (
@@ -101,6 +103,7 @@ export function LogoStroke({
         </filter>
       </defs>
 
+      <g style={{ opacity: logoVisible ? 0 : 1, transition: "opacity 1000ms ease-in-out" }}>
       {STROKES.map(({ id, inner, d, delay, dur, wipe }) => (
         <g
           key={id}
@@ -121,6 +124,19 @@ export function LogoStroke({
           </g>
         </g>
       ))}
+      </g>
+
+      {/* logo.png: 背景と同タイミングでふわっとフェードイン（前面） */}
+      <image
+        href="/images/logo.png"
+        x="0" y="0" width="6686" height="2008"
+        preserveAspectRatio="xMidYMid meet"
+        style={{
+          opacity: logoVisible ? 1 : 0,
+          transition: "opacity 1000ms ease-in-out",
+          mixBlendMode: "multiply",
+        }}
+      />
     </svg>
   );
 }

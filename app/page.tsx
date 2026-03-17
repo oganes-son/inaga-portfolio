@@ -187,7 +187,7 @@ export default function Home() {
               style={{ opacity: heroBgVisible ? 1 : 0 }}
             />
             {/* SVGロゴ: #333333で出現、背景フェードイン後もそのまま残る */}
-            <LogoStroke className="relative z-10 h-[25.6vh]" fill="#333333" />
+            <LogoStroke className="absolute z-0 h-[25.6vh]" fill="#333333" />
           </div>
         </main>
 
