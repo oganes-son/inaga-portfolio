@@ -5,6 +5,7 @@ import { FaXTwitter, FaSoundcloud, FaYoutube, FaInstagram, FaRegEnvelope } from 
 import { SiNiconico, SiSpotify, SiApplemusic, SiAmazonmusic } from "react-icons/si";
 import { musicWorks, designWorks, newsData } from "@/lib/works"; 
 import { VisualizerStyle2 } from '@/components/VisualizerStyle2';
+import { LogoStroke } from '@/components/LogoStroke';
 
 /* --- 共通パーツ (AnimatedLink, ContactLink, HorizontalScrollGalleryなどは以前のまま維持) --- */
 /* 省略：前回の回答のパーツ定義部分をそのまま使用してください */
@@ -111,7 +112,14 @@ function HorizontalScrollGallery({ items, type }: { items: any[], type: 'music' 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [showHeaderBg, setShowHeaderBg] = useState(false);
+  const [heroBgVisible, setHeroBgVisible] = useState(false);
   const { scrollY } = useScroll();
+
+  // か2終了(1.84s) + 0.5s余白 → 2.35s後に背景フェードイン
+  useEffect(() => {
+    const t = setTimeout(() => setHeroBgVisible(true), 2350);
+    return () => clearTimeout(t);
+  }, []);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setShowHeaderBg(latest > 300);
@@ -120,8 +128,11 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#ffffff] text-[#333333] relative overflow-x-hidden">
       
-      {/* ヘッダー */}
-      <header className="fixed top-0 left-0 w-full h-20 z-[100] flex items-center justify-between px-6 md:px-10 overflow-hidden">
+      {/* ヘッダー: ロゴアニメーション中は非表示、背景と同タイミングでフェードイン */}
+      <header
+        className="fixed top-0 left-0 w-full h-20 z-[100] flex items-center justify-between px-6 md:px-10 overflow-hidden transition-opacity duration-[1500ms] ease-in-out"
+        style={{ opacity: heroBgVisible ? 1 : 0, pointerEvents: heroBgVisible ? "auto" : "none" }}
+      >
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: showHeaderBg ? 1 : 0 }} className="hidden md:block absolute inset-0 z-[-2]" style={{ backgroundImage: "url('/images/top_logo.png')", backgroundSize: 'cover', backgroundPosition: 'bottom center' }} />
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: showHeaderBg ? 0.7 : 0 }} className="hidden md:block absolute inset-0 z-[-1] bg-white backdrop-blur-md shadow-sm" />
         <nav className="hidden md:flex gap-8 items-center h-full">
@@ -166,7 +177,18 @@ export default function Home() {
         {/* ファーストビュー */}
         <main className="h-auto md:h-screen w-full overflow-hidden">
           <img src="/images/top_logo_smartphone.png" alt="inaga" className="block md:hidden w-full h-auto object-cover self-start" />
-          <img src="/images/top_logo.png" alt="inaga" className="hidden md:block w-full h-full object-cover object-top" />
+          {/* PC版: 白背景→水彩背景フェードイン + ロゴアニメーション */}
+          <div className="relative hidden md:flex h-full items-center justify-center bg-white">
+            {/* 水彩背景: アニメーション完了後にふわっとフェードイン */}
+            <img
+              src="/images/hero_bg.png"
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-[1500ms] ease-in-out"
+              style={{ opacity: heroBgVisible ? 1 : 0 }}
+            />
+            {/* SVGロゴ: #333333で出現、背景フェードイン後もそのまま残る */}
+            <LogoStroke className="relative z-10 h-[25.6vh]" fill="#333333" />
+          </div>
         </main>
 
         {/* 🟢 ABOUT ─────────────────────────────────────────
