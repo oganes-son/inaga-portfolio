@@ -29,6 +29,7 @@ export type PlayerTrack = {
 export type SeoData = {
   title: string;
   description: string;
+  keywords: string[];
 };
 
 export type DesignNote = {

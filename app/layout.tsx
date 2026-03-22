@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   },
   description: seoData.description,
 
-  // キーワード: 検索エンジンへのヒント（過剰にならないよう厳選）
-  keywords: ["いなが", "いなが 音楽", "INAGA", "音楽クリエイター", "楽曲制作", "グラフィックデザイン", "ポートフォリオ", "札幌", "北海道大学", "Purify", "Paradigm Shift"],
+  // キーワード: data/works.json の seoData から読み込み
+  keywords: seoData.keywords,
 
   // canonical URL: 正規URLをGoogleに伝える
   alternates: {
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     description: seoData.description,
     images: [
       {
-        url: "/images/top_logo.png",
+        url: "/images/ogp.png",
         width: 1200,
         height: 630,
         alt: "いなが Portfolio",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     site: "@inaga_P",
     title: seoData.title,
     description: seoData.description,
-    images: ["/images/top_logo.png"],
+    images: ["/images/ogp.png"],
   },
 
   // クロール設定

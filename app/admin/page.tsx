@@ -24,7 +24,7 @@ type Work = {
 };
 type News = { date: string; content: string; link?: string; };
 type PlayerTrack = { slug: string; mp3Filename: string; };
-type SeoData = { title: string; description: string; };
+type SeoData = { title: string; description: string; keywords: string[]; };
 type WorksData = { musicWorks: Work[]; designWorks: Work[]; newsData: News[]; playerTrack: PlayerTrack; seoData: SeoData; };
 type ActiveTab = "music" | "design" | "news" | "player" | "seo";
 type PendingUpload = { filename: string; base64: string; localUrl: string; type: "music" | "design" | "mp3"; };
@@ -613,7 +613,8 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     fetch("/api/admin/data", { headers: authHeader, cache: "no-store" })
       .then((r) => r.json())
       .then(({ data }) => {
-        if (!data.seoData) data.seoData = { title: "", description: "" };
+        if (!data.seoData) data.seoData = { title: "", description: "", keywords: [] };
+        if (!data.seoData.keywords) data.seoData.keywords = [];
         setWorksData(data);
         setPlayerSlug(data.playerTrack?.slug ?? "");
       })
@@ -852,31 +853,14 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     setIsCommitting(true);
     setStatusMsg("コミット中...");
 
-    for (const upload of pendingUploads) {
-      const res = await fetch("/api/admin/image", {
-        method: "POST",
-        headers: { ...authHeader, "Content-Type": "application/json" },
-        body: JSON.stringify({ base64: upload.base64, filename: upload.filename, type: upload.type }),
-      });
-      if (!res.ok) {
-        setStatusMsg(`画像「${upload.filename}」のアップロードに失敗しました。`);
-        setIsCommitting(false);
-        return;
-      }
-    }
-
-    for (const del of pendingDeletions) {
-      await fetch("/api/admin/image", {
-        method: "DELETE",
-        headers: { ...authHeader, "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: del.filename, type: del.type }),
-      }).catch(() => {});
-    }
-
-    const res = await fetch("/api/admin/data", {
-      method: "PUT",
+    const res = await fetch("/api/admin/commit", {
+      method: "POST",
       headers: { ...authHeader, "Content-Type": "application/json" },
-      body: JSON.stringify({ data: worksData }),
+      body: JSON.stringify({
+        data: worksData,
+        uploads: pendingUploads,
+        deletions: pendingDeletions,
+      }),
     });
 
     if (res.ok) {
@@ -1143,6 +1127,25 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                   rows={4}
                   className="border border-gray-200 rounded px-2 py-1.5 text-xs resize-none focus:outline-none focus:border-gray-400"
                 />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-['Bahnschrift'] tracking-widest opacity-70 uppercase">
+                  キーワード
+                  <span className="ml-2 opacity-40 normal-case">カンマ区切りで入力</span>
+                </label>
+                <textarea
+                  value={worksData.seoData.keywords.join(", ")}
+                  onChange={(e) => {
+                    const keywords = e.target.value.split(",").map((k) => k.trim()).filter(Boolean);
+                    setWorksData({ ...worksData, seoData: { ...worksData.seoData, keywords } });
+                    setIsCommitPending(true);
+                  }}
+                  placeholder="いなが, INAGA, DTM, グラフィックデザイン, ..."
+                  rows={3}
+                  className="border border-gray-200 rounded px-2 py-1.5 text-xs resize-none focus:outline-none focus:border-gray-400"
+                />
+                <p className="text-[10px] opacity-40">{worksData.seoData.keywords.length} 個</p>
               </div>
 
             </div>
