@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { seoData } from "@/lib/works";
+import { getSiteData } from "@/lib/site-data";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,67 +15,71 @@ const geistMono = Geist_Mono({
 
 const BASE_URL = "https://inagainaga.vercel.app";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(BASE_URL),
+// タイトル・説明文・キーワード: アドミンの SEO タブ（Blob 上の works.json）から読み込み
+export async function generateMetadata(): Promise<Metadata> {
+  const { seoData } = await getSiteData();
+  return {
+    metadataBase: new URL(BASE_URL),
 
-  // タイトル・説明文: data/works.json の seoData から読み込み
-  title: {
-    default: seoData.title,
-    template: "%s | いなが",
-  },
-  description: seoData.description,
-
-  // キーワード: data/works.json の seoData から読み込み
-  keywords: seoData.keywords,
-
-  // canonical URL: 正規URLをGoogleに伝える
-  alternates: {
-    canonical: BASE_URL,
-  },
-
-  // OGP: SNSシェア時のカード表示
-  openGraph: {
-    type: "website",
-    url: BASE_URL,
-    siteName: "いなが Portfolio",
-    locale: "ja_JP",
-    title: seoData.title,
+    // タイトル・説明文: data/works.json の seoData から読み込み
+    title: {
+      default: seoData.title,
+      template: "%s | いなが",
+    },
     description: seoData.description,
-    images: [
-      {
-        url: "/images/ogp.png",
-        width: 1200,
-        height: 630,
-        alt: "いなが Portfolio",
-      },
-    ],
-  },
 
-  // Twitter Card
-  twitter: {
-    card: "summary_large_image",
-    site: "@inaga_P",
-    title: seoData.title,
-    description: seoData.description,
-    images: ["/images/ogp.png"],
-  },
+    // キーワード: data/works.json の seoData から読み込み
+    keywords: seoData.keywords,
 
-  // クロール設定
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true },
-  },
+    // canonical URL: 正規URLをGoogleに伝える
+    alternates: {
+      canonical: BASE_URL,
+    },
 
-  // Google Search Console 認証コード
-  verification: {
-    google: "C8Z_zfa1YbOqMXeAbiiHU8f3qzEUHG_xqWbPjQwgLhE",
-  },
+    // OGP: SNSシェア時のカード表示
+    openGraph: {
+      type: "website",
+      url: BASE_URL,
+      siteName: "いなが Portfolio",
+      locale: "ja_JP",
+      title: seoData.title,
+      description: seoData.description,
+      images: [
+        {
+          url: "/images/ogp.png",
+          width: 1200,
+          height: 630,
+          alt: "いなが Portfolio",
+        },
+      ],
+    },
 
-  icons: {
-    icon: "/images/favicon.ico",
-  },
-};
+    // Twitter Card
+    twitter: {
+      card: "summary_large_image",
+      site: "@inaga_P",
+      title: seoData.title,
+      description: seoData.description,
+      images: ["/images/ogp.png"],
+    },
+
+    // クロール設定
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true },
+    },
+
+    // Google Search Console 認証コード
+    verification: {
+      google: "C8Z_zfa1YbOqMXeAbiiHU8f3qzEUHG_xqWbPjQwgLhE",
+    },
+
+    icons: {
+      icon: "/images/favicon.ico",
+    },
+  };
+}
 
 // JSON-LD 構造化データ: Googleに「いなが＝音楽クリエイター」と明示する
 const jsonLd = {

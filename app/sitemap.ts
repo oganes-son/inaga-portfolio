@@ -1,9 +1,10 @@
-import { MetadataRoute } from "next";
-import { musicWorks, designWorks } from "@/lib/works";
+import type { MetadataRoute } from "next";
+import { getSiteData } from "@/lib/site-data";
 
 const BASE_URL = "https://inagainaga.vercel.app";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { musicWorks, designWorks } = await getSiteData();
   const workPages = [...musicWorks, ...designWorks].map((work) => ({
     url: `${BASE_URL}/work-slug/${work.slug}`,
     lastModified: new Date(),
@@ -15,20 +16,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: BASE_URL,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "weekly" as const,
       priority: 1.0,
     },
     {
       url: `${BASE_URL}/work-type/music`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "weekly" as const,
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/work-type/design`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "weekly" as const,
       priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/news`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/design-notes`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     },
     ...workPages,
   ];

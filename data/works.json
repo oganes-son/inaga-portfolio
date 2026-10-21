@@ -257,10 +257,17 @@
       "link": ""
     }
   ],
-  "playerTrack": {
-    "slug": "purify",
-    "mp3Filename": "Purify.mp3"
+  "about": {
+    "name": "いなが",
+    "body": "2004年11月24日生まれの21歳。札幌在住。\n音楽やグラフィックデザインを制作。\n北海道大学工学部情報エレクトロニクス学科所属。"
   },
+  "playerTracks": [
+    {
+      "slug": "purify",
+      "mp3Filename": "Purify.mp3",
+      "enabled": true
+    }
+  ],
   "seoData": {
     "title": "いなが（INAGA）| DTM / デザイン ポートフォリオ",
     "description": "いながの公式ポートフォリオサイト。",

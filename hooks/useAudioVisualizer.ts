@@ -1,33 +1,30 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, type RefObject } from 'react';
 
-export const useAudioVisualizer = (audioElement: HTMLAudioElement | null) => {
+export const useAudioVisualizer = (audioRef: RefObject<HTMLAudioElement | null>) => {
   const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
 
+  // 初回再生時に1度だけ作成（同じ audio 要素は src を変えてもそのまま使える）
   const initAudioContext = useCallback(() => {
-    // audioElement が null の場合は実行しない
+    const audioElement = audioRef.current;
     if (!audioElement || audioContextRef.current) return;
 
     try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const audioContext = new AudioContextClass();
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 2048; 
+      const node = audioContext.createAnalyser();
+      node.fftSize = 2048;
 
       const source = audioContext.createMediaElementSource(audioElement);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
+      source.connect(node);
+      node.connect(audioContext.destination);
 
       audioContextRef.current = audioContext;
-      analyserRef.current = analyser;
-      sourceRef.current = source;
-      setIsReady(true);
+      setAnalyser(node);
     } catch (e) {
       console.error("AudioContext initialization failed:", e);
     }
-  }, [audioElement]);
+  }, [audioRef]);
 
   const resumeAudioContext = useCallback(() => {
     if (audioContextRef.current?.state === 'suspended') {
@@ -35,5 +32,5 @@ export const useAudioVisualizer = (audioElement: HTMLAudioElement | null) => {
     }
   }, []);
 
-  return { analyser: analyserRef.current, isReady, initAudioContext, resumeAudioContext };
+  return { analyser, isReady: analyser !== null, initAudioContext, resumeAudioContext };
 };

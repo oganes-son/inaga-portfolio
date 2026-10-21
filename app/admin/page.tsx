@@ -9,26 +9,23 @@ import {
   useSortable, verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { FaSoundcloud, FaYoutube, FaPlay } from "react-icons/fa6";
+import { FaSoundcloud, FaYoutube, FaPlay, FaBackwardStep, FaForwardStep } from "react-icons/fa6";
 import { SiNiconico, SiSpotify, SiApplemusic, SiAmazonmusic } from "react-icons/si";
 import { FiTrash2, FiUpload, FiChevronDown, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { upload } from "@vercel/blob/client";
+import {
+  normalizeSiteData, workImageUrl, displayFilename,
+  type Work, type News, type SiteData, type PlayerTrack, type Mp3File,
+} from "@/lib/works";
 
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
-type Work = {
-  id: number; slug: string; filename: string; title: string;
-  description?: string; tools?: string;
-  soundcloud?: string; youtube?: string; niconico?: string;
-  spotify?: string; appleMusic?: string; amazonMusic?: string;
-};
-type News = { date: string; content: string; link?: string; };
-type PlayerTrack = { slug: string; mp3Filename: string; };
-type SeoData = { title: string; description: string; keywords: string[]; };
-type WorksData = { musicWorks: Work[]; designWorks: Work[]; newsData: News[]; playerTrack: PlayerTrack; seoData: SeoData; };
-type ActiveTab = "music" | "design" | "news" | "player" | "seo";
-type PendingUpload = { filename: string; base64: string; localUrl: string; type: "music" | "design" | "mp3"; };
-type PendingDeletion = { filename: string; type: "music" | "design" | "mp3"; };
+type WorksData = SiteData;
+type ActiveTab = "music" | "design" | "news" | "player" | "about" | "seo";
+type UploadType = "music" | "design" | "mp3";
+// file は「保存して公開」時にブラウザから Vercel Blob へ直接アップロードされる（MP3 は選択時に即アップロード）
+type PendingUpload = { filename: string; file: Blob; localUrl: string; type: "music" | "design"; };
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -37,31 +34,32 @@ function generateSlug(title: string): string {
   return title.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim();
 }
 
-async function fileToBase64(file: File): Promise<string> {
-  if (file.size > 2 * 1024 * 1024) {
-    // Resize large images
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const maxWidth = 1200;
-        let { width, height } = img;
-        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
-        const canvas = document.createElement("canvas");
-        canvas.width = width; canvas.height = height;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
-      };
-      img.onerror = reject;
-      img.src = url;
-    });
-  }
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve((reader.result as string).split(",")[1]);
-    reader.readAsDataURL(file);
+// 2MB を超える画像は幅1200pxの JPEG に縮小する
+async function prepareImage(file: File): Promise<{ blob: Blob; filename: string }> {
+  if (file.size <= 2 * 1024 * 1024) return { blob: file, filename: file.name };
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxWidth = 1200;
+      let { width, height } = img;
+      if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        if (!blob) { reject(new Error("resize failed")); return; }
+        resolve({ blob, filename: file.name.replace(/\.[^.]+$/, "") + ".jpg" });
+      }, "image/jpeg", 0.85);
+    };
+    img.onerror = reject;
+    img.src = url;
   });
+}
+
+function blobPathname(type: UploadType, filename: string): string {
+  return type === "mp3" ? `music/${filename}` : `images/${type}/${filename}`;
 }
 
 // ─────────────────────────────────────────────
@@ -108,7 +106,7 @@ function TextareaField({ label, value, onChange, placeholder }: {
 // ─────────────────────────────────────────────
 type ImageUploadProps = {
   filename: string;
-  pendingUpload: { base64: string; localUrl: string; filename: string } | null;
+  pendingUpload: { localUrl: string; filename: string } | null;
   isMarkedForDelete: boolean;
   onSelectFile: (file: File) => void;
   onRenameFile: (newName: string) => void;
@@ -162,7 +160,7 @@ function ImageUploadSection({
       {!pendingUpload && filename && (
         <div className={`flex items-center gap-2 rounded px-3 py-2 ${isMarkedForDelete ? "bg-red-50 border border-red-200" : "bg-gray-50 border border-gray-100"}`}>
           <span className={`flex-1 text-xs truncate font-['Bahnschrift'] tracking-wide ${isMarkedForDelete ? "line-through opacity-40" : "opacity-60"}`}>
-            {filename}
+            {displayFilename(filename)}
           </span>
           {isMarkedForDelete ? (
             <button type="button" onClick={onUnmarkDelete}
@@ -170,7 +168,7 @@ function ImageUploadSection({
               元に戻す
             </button>
           ) : (
-            <button type="button" onClick={onMarkDelete} title="コミット時に削除"
+            <button type="button" onClick={onMarkDelete} title="保存時に削除"
               className="text-red-400 hover:text-red-600 transition-colors shrink-0">
               <FiTrash2 className="text-sm" />
             </button>
@@ -242,7 +240,7 @@ function NewsForm({ item, onChange }: { item: News; onChange: (v: News) => void 
 function MobileWorkPreview({ work, imageUrl, isMusic }: {
   work: Work; imageUrl: string | null; isMusic: boolean;
 }) {
-  const imgSrc = imageUrl || (work.filename ? `/images/${isMusic ? "MUSIC" : "DESIGN"} WORKS/${work.filename}` : null);
+  const imgSrc = imageUrl || (workImageUrl(work.filename, isMusic ? "music" : "design") || null);
   const category = isMusic ? "MUSIC / ALBUM DESIGN" : "DESIGN";
   return (
     <div className="flex flex-col gap-4 text-[#333333] pb-4 pt-4 px-3">
@@ -285,7 +283,7 @@ function MobileWorkPreview({ work, imageUrl, isMusic }: {
 function PCWorkPreview({ work, imageUrl, isMusic }: {
   work: Work; imageUrl: string | null; isMusic: boolean;
 }) {
-  const imgSrc = imageUrl || (work.filename ? `/images/${isMusic ? "MUSIC" : "DESIGN"} WORKS/${work.filename}` : null);
+  const imgSrc = imageUrl || (workImageUrl(work.filename, isMusic ? "music" : "design") || null);
   const category = isMusic ? "MUSIC / ALBUM DESIGN" : "DESIGN";
   // 本番ページのレイアウト幅に合わせて描画し、zoom で縮小表示
   // zoom はレイアウトにも影響するため、内容に応じて高さが自動で決まる
@@ -356,8 +354,8 @@ function NewsPreviewCard({ item }: { item: News }) {
 }
 
 // プレイヤープレビュー（PC）: VisualizerStyle2 のPC横並びレイアウトを模倣
-function PlayerPreviewPC({ work, imageUrl }: { work: Work; imageUrl: string | null }) {
-  const imgSrc = imageUrl || (work.filename ? encodeURI(`/images/MUSIC WORKS/${work.filename}`) : null);
+function PlayerPreviewPC({ work, imageUrl, playlist }: { work: Work; imageUrl: string | null; playlist: string[] }) {
+  const imgSrc = imageUrl || (workImageUrl(work.filename, "music") || null);
   const RENDER_WIDTH = 700;
   const SCALE = 0.58;
   return (
@@ -384,7 +382,9 @@ function PlayerPreviewPC({ work, imageUrl }: { work: Work; imageUrl: string | nu
             <h2 className="text-[24pt] font-['Mobo-bold'] leading-tight tracking-wider mb-2">
               {work.title || "（タイトル未入力）"}
             </h2>
-            <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-10 uppercase">INAGA</p>
+            <p className="text-[10pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-10 uppercase">
+              INAGA{playlist.length > 1 && <span className="ml-4">01 / {String(playlist.length).padStart(2, "0")}</span>}
+            </p>
             {/* シークバー（静的） */}
             <div className="w-full mb-8 flex flex-col gap-2">
               <div className="w-full h-[2px] bg-[#333333]/10 relative">
@@ -395,6 +395,13 @@ function PlayerPreviewPC({ work, imageUrl }: { work: Work; imageUrl: string | nu
                 <span>—:——</span>
               </div>
             </div>
+            {playlist.length > 1 && (
+              <div className="flex items-center gap-8 mb-6 text-[14pt]">
+                <FaBackwardStep className="opacity-70" />
+                <FaPlay className="text-[20pt]" />
+                <FaForwardStep className="opacity-70" />
+              </div>
+            )}
             {/* SNSアイコン */}
             <div className="flex gap-6 text-[26px] mt-2">
               {SNS_ICONS.map(({ key, Icon }) =>
@@ -403,6 +410,7 @@ function PlayerPreviewPC({ work, imageUrl }: { work: Work; imageUrl: string | nu
                 ) : null
               )}
             </div>
+            <PreviewTrackList playlist={playlist} className="mt-8 text-[10pt] py-2.5" />
           </div>
         </div>
       </div>
@@ -411,8 +419,8 @@ function PlayerPreviewPC({ work, imageUrl }: { work: Work; imageUrl: string | nu
 }
 
 // プレイヤープレビュー（スマホ）: VisualizerStyle2 のモバイル縦積みレイアウトを模倣
-function PlayerPreviewMobile({ work, imageUrl }: { work: Work; imageUrl: string | null }) {
-  const imgSrc = imageUrl || (work.filename ? encodeURI(`/images/MUSIC WORKS/${work.filename}`) : null);
+function PlayerPreviewMobile({ work, imageUrl, playlist }: { work: Work; imageUrl: string | null; playlist: string[] }) {
+  const imgSrc = imageUrl || (workImageUrl(work.filename, "music") || null);
   return (
     <div className="flex flex-col items-center gap-4 text-[#333333] py-4 px-3">
       {/* アートワーク */}
@@ -431,7 +439,9 @@ function PlayerPreviewMobile({ work, imageUrl }: { work: Work; imageUrl: string 
         <h2 className="text-[12pt] font-['Mobo-bold'] leading-tight tracking-wider mb-1 text-center">
           {work.title || "（タイトル未入力）"}
         </h2>
-        <p className="text-[7pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-4 uppercase">INAGA</p>
+        <p className="text-[7pt] font-['Bahnschrift'] tracking-[0.3em] opacity-40 mb-4 uppercase">
+          INAGA{playlist.length > 1 && <span className="ml-2">01 / {String(playlist.length).padStart(2, "0")}</span>}
+        </p>
         {/* シークバー（静的） */}
         <div className="w-full mb-3 flex flex-col gap-1">
           <div className="w-full h-[2px] bg-[#333333]/10 relative">
@@ -443,8 +453,10 @@ function PlayerPreviewMobile({ work, imageUrl }: { work: Work; imageUrl: string 
           </div>
         </div>
         {/* 再生ボタン */}
-        <div className="flex justify-center mb-4">
+        <div className="flex items-center justify-center gap-6 mb-4">
+          {playlist.length > 1 && <FaBackwardStep className="text-[12pt] opacity-70" />}
           <FaPlay className="text-[#333333] text-[20pt] ml-1" />
+          {playlist.length > 1 && <FaForwardStep className="text-[12pt] opacity-70" />}
         </div>
         {/* SNSアイコン */}
         <div className="flex gap-4 text-[18px]">
@@ -453,6 +465,169 @@ function PlayerPreviewMobile({ work, imageUrl }: { work: Work; imageUrl: string 
               <span key={key} className="opacity-70"><Icon /></span>
             ) : null
           )}
+        </div>
+        <PreviewTrackList playlist={playlist} className="mt-4 text-[7.5pt] py-1.5" />
+      </div>
+    </div>
+  );
+}
+
+// プレイヤープレビュー用のトラックリスト（1曲目を再生中として表示）
+function PreviewTrackList({ playlist, className }: { playlist: string[]; className: string }) {
+  if (playlist.length < 2) return null;
+  return (
+    <ol className="w-full border-t border-[#333333]/10">
+      {playlist.map((title, i) => (
+        <li key={i} className={`flex items-center gap-3 border-b border-[#333333]/5 ${className} ${i === 0 ? "opacity-100 font-['Mobo-bold']" : "opacity-45 font-['Mobo']"}`}>
+          <span className="font-['Bahnschrift'] tracking-widest w-5 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+          <span className="truncate tracking-wider">{title}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+// ─────────────────────────────────────────────
+// PLAYER タブ: プレイリスト + MP3 ライブラリ
+// ─────────────────────────────────────────────
+function PlaylistRow({ id, index, track, musicWorks, library, onChange, onRemove }: {
+  id: string; index: number; track: PlayerTrack; musicWorks: Work[]; library: Mp3File[];
+  onChange: (t: PlayerTrack) => void; onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const work = musicWorks.find((w) => w.slug === track.slug);
+  // ライブラリに無い値（旧来のファイル名など）も選択肢に残す
+  const mp3Options = track.mp3Filename && !library.some((f) => f.value === track.mp3Filename)
+    ? [{ value: track.mp3Filename, name: displayFilename(track.mp3Filename) }, ...library]
+    : library;
+  const selectClass = "w-full border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-gray-400 font-['Bahnschrift'] tracking-wide bg-white";
+
+  return (
+    <div ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className={`flex items-center gap-2 bg-white border rounded px-2 py-2 transition-colors ${track.enabled ? "border-gray-300" : "border-gray-100"}`}>
+      <span {...attributes} {...listeners} title="ドラッグで並べ替え"
+        className="text-gray-400 text-sm shrink-0 cursor-grab active:cursor-grabbing select-none touch-none px-1">⠿</span>
+      <input type="checkbox" checked={track.enabled} onChange={(e) => onChange({ ...track, enabled: e.target.checked })}
+        title="チェックした曲をプレイヤーで再生" className="w-4 h-4 accent-[#333333] shrink-0 cursor-pointer" />
+      <span className="text-xs font-['Bahnschrift'] text-gray-400 w-5 text-right shrink-0">{index + 1}</span>
+      <div className={`w-10 h-10 shrink-0 bg-gray-100 overflow-hidden ${track.enabled ? "" : "opacity-40"}`}>
+        {work?.filename && <img src={workImageUrl(work.filename, "music")} alt="" className="w-full h-full object-cover" />}
+      </div>
+      <div className={`flex-1 min-w-0 flex flex-col gap-1 ${track.enabled ? "" : "opacity-50"}`}>
+        <select value={track.slug} onChange={(e) => onChange({ ...track, slug: e.target.value })} className={selectClass}>
+          <option value="">-- 作品（アートワーク・タイトル）--</option>
+          {musicWorks.map((w) => <option key={w.id} value={w.slug}>{w.title}</option>)}
+        </select>
+        <select value={track.mp3Filename} onChange={(e) => onChange({ ...track, mp3Filename: e.target.value })} className={selectClass}>
+          <option value="">-- MP3 を選択 --</option>
+          {mp3Options.map((f) => <option key={f.value} value={f.value}>♪ {f.name}</option>)}
+        </select>
+      </div>
+      <button onClick={onRemove} title="プレイリストから外す（MP3 は残ります）"
+        className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0">
+        <FiTrash2 className="text-sm" />
+      </button>
+    </div>
+  );
+}
+
+// MP3 ファイル名から作品を推測（"Purify.mp3" → slug "purify"）
+function guessSlug(name: string, musicWorks: Work[]): string {
+  const norm = (s: string) => s.toLowerCase().replace(/\.[^.]+$/, "").replace(/[^a-z0-9]/g, "");
+  const n = norm(name);
+  return musicWorks.find((w) => n && (norm(w.slug) === n || norm(w.title) === n))?.slug ?? "";
+}
+
+function PlayerTab({ tracks, musicWorks, library, uploading, onChangeTracks, onUpload, onDeleteMp3 }: {
+  tracks: PlayerTrack[]; musicWorks: Work[]; library: Mp3File[]; uploading: string | null;
+  onChangeTracks: (t: PlayerTrack[]) => void; onUpload: (files: File[]) => void; onDeleteMp3: (f: Mp3File) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+  const enabledCount = tracks.filter((t) => t.enabled && t.mp3Filename).length;
+
+  function handleDragEnd({ active, over }: DragEndEvent) {
+    if (!over || active.id === over.id) return;
+    onChangeTracks(arrayMove([...tracks], Number(active.id), Number(over.id)));
+  }
+  const update = (i: number, t: PlayerTrack) => onChangeTracks(tracks.map((x, j) => (j === i ? t : x)));
+  const addTrack = (mp3Filename = "", name = "") =>
+    onChangeTracks([...tracks, { slug: name ? guessSlug(name, musicWorks) : "", mp3Filename, enabled: true }]);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* プレイリスト */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase">Playlist</p>
+          <button onClick={() => addTrack()}
+            className="text-xs font-['Bahnschrift'] tracking-widest bg-[#333333] text-white px-3 py-1.5 rounded hover:bg-[#555555] transition-colors">
+            + 曲を追加
+          </button>
+        </div>
+        <p className="text-[10px] opacity-50 mb-3 leading-relaxed">
+          チェックを入れた曲が上から順に再生されます（現在 {enabledCount} 曲）。⠿ をドラッグで並べ替え。
+        </p>
+        {tracks.length === 0 ? (
+          <p className="text-xs opacity-30 font-['Bahnschrift'] tracking-widest text-center py-6">曲がありません</p>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={tracks.map((_, i) => String(i))} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-2">
+                {tracks.map((t, i) => (
+                  <PlaylistRow key={i} id={String(i)} index={i} track={t} musicWorks={musicWorks} library={library}
+                    onChange={(nt) => update(i, nt)}
+                    onRemove={() => onChangeTracks(tracks.filter((_, j) => j !== i))} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
+
+      {/* MP3 ライブラリ */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase mb-1">MP3 Library</p>
+        <p className="text-[10px] opacity-50 mb-3 leading-relaxed">
+          アップロードした MP3 はすぐに保存され、ここからプレイリストに追加できます。
+        </p>
+        <input type="file" accept=".mp3,audio/*" multiple className="hidden" id="mp3-upload"
+          onChange={(e) => { const files = Array.from(e.target.files ?? []); e.target.value = ""; if (files.length) onUpload(files); }} />
+        <label htmlFor="mp3-upload"
+          className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-colors text-xs text-gray-500 font-['Bahnschrift'] tracking-widest cursor-pointer mb-3 ${uploading ? "pointer-events-none opacity-60" : ""}`}>
+          <FiUpload className="text-sm" />
+          {uploading ? `アップロード中... ${uploading}` : "MP3 をアップロード"}
+        </label>
+        <div className="flex flex-col gap-1">
+          {library.length === 0 && (
+            <p className="text-xs opacity-30 font-['Bahnschrift'] tracking-widest text-center py-3">MP3 がありません</p>
+          )}
+          {library.map((f) => {
+            const inUse = tracks.some((t) => t.mp3Filename === f.value);
+            return (
+              <div key={f.value} className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded px-3 py-2">
+                <span className="flex-1 min-w-0 truncate text-xs font-['Bahnschrift'] tracking-wide">♪ {f.name}</span>
+                {f.size !== undefined && (
+                  <span className="text-[10px] opacity-40 font-['Bahnschrift'] shrink-0">{(f.size / 1024 / 1024).toFixed(1)}MB</span>
+                )}
+                {inUse ? (
+                  <span className="text-[10px] text-green-700 bg-green-50 border border-green-200 rounded px-1.5 py-0.5 shrink-0">使用中</span>
+                ) : (
+                  <button onClick={() => addTrack(f.value, f.name)}
+                    className="text-[10px] font-['Bahnschrift'] tracking-widest border border-gray-300 rounded px-2 py-0.5 hover:bg-white shrink-0">
+                    + プレイリストへ
+                  </button>
+                )}
+                <button onClick={() => onDeleteMp3(f)} disabled={inUse} title={inUse ? "使用中は削除できません" : "ライブラリから削除"}
+                  className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0 disabled:opacity-30 disabled:hover:text-gray-300">
+                  <FiTrash2 className="text-sm" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -592,33 +767,36 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   const [editHistoryIdx, setEditHistoryIdx] = useState(-1);
 
   // Image edit state
-  const [editImagePending, setEditImagePending] = useState<{ base64: string; localUrl: string; filename: string } | null>(null);
+  const [editImagePending, setEditImagePending] = useState<{ file: Blob; localUrl: string; filename: string } | null>(null);
   const [editImageDeleteExisting, setEditImageDeleteExisting] = useState(false);
 
-  // Commit queue
+  // Commit queue（pendingDeletions は削除する Blob の URL / ファイル名）
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
-  const [pendingDeletions, setPendingDeletions] = useState<PendingDeletion[]>([]);
+  const [pendingDeletions, setPendingDeletions] = useState<string[]>([]);
+  const [dataSource, setDataSource] = useState<"blob" | "repo" | null>(null);
   const [isCommitPending, setIsCommitPending] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
   const [previewMode, setPreviewMode] = useState<"pc" | "mobile">("pc");
 
-  // PLAYER タブ用
-  const [playerSlug, setPlayerSlug] = useState<string>("");
-  const [playerMp3Pending, setPlayerMp3Pending] = useState<{ base64: string; filename: string } | null>(null);
+  // PLAYER タブ用: MP3 ライブラリ（Blob に保存済みの MP3 一覧）
+  const [mp3Library, setMp3Library] = useState<Mp3File[]>([]);
+  const [mp3Uploading, setMp3Uploading] = useState<string | null>(null);
 
   const authHeader = { Authorization: `Bearer ${password}` };
 
   useEffect(() => {
     fetch("/api/admin/data", { headers: authHeader, cache: "no-store" })
       .then((r) => r.json())
-      .then(({ data }) => {
-        if (!data.seoData) data.seoData = { title: "", description: "", keywords: [] };
-        if (!data.seoData.keywords) data.seoData.keywords = [];
-        setWorksData(data);
-        setPlayerSlug(data.playerTrack?.slug ?? "");
+      .then(({ data: raw, source }) => {
+        setWorksData(normalizeSiteData(raw));
+        setDataSource(source);
       })
       .catch(() => setStatusMsg("データの取得に失敗しました。"));
+    fetch("/api/admin/mp3", { headers: authHeader, cache: "no-store" })
+      .then((r) => r.json())
+      .then(({ files }) => setMp3Library(files ?? []))
+      .catch(() => {});
   }, []);
 
   const currentList = (): (Work | News)[] => {
@@ -731,11 +909,10 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
   // ── Image handlers ──
   async function handleSelectImage(file: File) {
     const localUrl = URL.createObjectURL(file);
-    const base64 = await fileToBase64(file);
-    const pending = { base64, localUrl, filename: file.name };
-    setEditImagePending(pending);
+    const { blob, filename } = await prepareImage(file);
+    setEditImagePending({ file: blob, localUrl, filename });
     if (editingItem && activeTab !== "news") {
-      setEditingItem({ ...(editingItem as Work), filename: file.name });
+      setEditingItem({ ...(editingItem as Work), filename });
     }
   }
 
@@ -769,32 +946,55 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     }
   }
 
-  // ── PLAYER: MP3選択 ──
-  async function handleMp3Select(file: File) {
-    return new Promise<void>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = (reader.result as string).split(",")[1];
-        setPlayerMp3Pending({ base64, filename: file.name });
-        resolve();
-      };
-      reader.readAsDataURL(file);
-    });
+  // ── PLAYER: プレイリスト編集（「保存して公開」で反映） ──
+  function setPlayerTracks(playerTracks: PlayerTrack[]) {
+    if (!worksData) return;
+    setWorksData({ ...worksData, playerTracks });
+    setIsCommitPending(true);
   }
 
-  // ── PLAYER: 一時保存 ──
-  function handlePlayerTempSave() {
-    if (!worksData || !playerSlug) return;
-    const mp3Filename = playerMp3Pending?.filename ?? worksData.playerTrack.mp3Filename;
-    const updated: WorksData = { ...worksData, playerTrack: { slug: playerSlug, mp3Filename } };
-    if (playerMp3Pending) {
-      setPendingUploads((prev) => [
-        ...prev.filter((p) => p.type !== "mp3"),
-        { filename: playerMp3Pending.filename, base64: playerMp3Pending.base64, localUrl: "", type: "mp3" },
-      ]);
+  // ── PLAYER: MP3 をライブラリへ即時アップロード（ブラウザ → Blob 直送） ──
+  async function handleMp3Upload(files: File[]) {
+    for (const file of files) {
+      setMp3Uploading(file.name);
+      try {
+        const blob = await upload(blobPathname("mp3", file.name), file, {
+          access: "public",
+          handleUploadUrl: "/api/admin/upload",
+          headers: authHeader,
+          multipart: file.size > 5 * 1024 * 1024,
+        });
+        setMp3Library((prev) => [
+          { value: blob.url, name: file.name, size: file.size, uploadedAt: new Date().toISOString() },
+          ...prev,
+        ]);
+        setStatusMsg(`${file.name} をライブラリに保存しました。`);
+      } catch (e) {
+        setStatusMsg(`${file.name} のアップロードに失敗しました: ${e instanceof Error ? e.message : String(e)}`);
+      }
     }
-    setWorksData(updated);
-    setIsCommitPending(true);
+    setMp3Uploading(null);
+  }
+
+  // ── PLAYER: ライブラリから MP3 を削除（プレイリストで使用中のものは不可） ──
+  async function handleMp3Delete(file: Mp3File) {
+    if (worksData?.playerTracks.some((t) => t.mp3Filename === file.value)) {
+      setStatusMsg("プレイリストで使用中の MP3 は削除できません。先にプレイリストから外して保存してください。");
+      return;
+    }
+    if (!window.confirm(`${file.name} をライブラリから完全に削除しますか？`)) return;
+    const res = await fetch("/api/admin/mp3", {
+      method: "DELETE",
+      headers: { ...authHeader, "Content-Type": "application/json" },
+      body: JSON.stringify({ url: file.value }),
+    });
+    if (res.ok) {
+      setMp3Library((prev) => prev.filter((f) => f.value !== file.value));
+      setStatusMsg(`${file.name} を削除しました。`);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      setStatusMsg(`削除に失敗しました: ${err.error ?? res.status}`);
+    }
   }
 
   // ── 一時保存 ──
@@ -806,17 +1006,14 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
       const type = activeTab as "music" | "design";
       setPendingUploads((prev) => [
         ...prev.filter((p) => !(p.type === type && p.filename === editImagePending.filename)),
-        { filename: editImagePending.filename, base64: editImagePending.base64, localUrl: editImagePending.localUrl, type },
+        { filename: editImagePending.filename, file: editImagePending.file, localUrl: "", type },
       ]);
     }
 
-    // Queue image deletion
-    if (editImageDeleteExisting && originalFilename && activeTab !== "news") {
-      const type = activeTab as "music" | "design";
-      setPendingDeletions((prev) => [
-        ...prev.filter((p) => !(p.type === type && p.filename === originalFilename)),
-        { filename: originalFilename, type },
-      ]);
+    // Queue image deletion（削除指定 or 新しい画像への差し替え）
+    const replaced = editImagePending && editImagePending.filename !== originalFilename;
+    if ((editImageDeleteExisting || replaced) && originalFilename && activeTab !== "news") {
+      setPendingDeletions((prev) => [...prev.filter((f) => f !== originalFilename), originalFilename]);
     }
 
     // Auto-generate slug
@@ -847,31 +1044,58 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     cancelEdit();
   }
 
-  // ── 全てコミット ──
+  // ── 保存して公開 ──
+  // 1. 新しい画像をブラウザから Vercel Blob へ直接アップロード（4.5MB 制限なし）
+  // 2. works.json を Blob に保存 → サイトに反映
   async function handleCommitAll() {
     if (!worksData) return;
     setIsCommitting(true);
-    setStatusMsg("コミット中...");
 
-    const res = await fetch("/api/admin/commit", {
-      method: "POST",
-      headers: { ...authHeader, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        data: worksData,
-        uploads: pendingUploads,
-        deletions: pendingDeletions,
-      }),
-    });
+    const data: WorksData = JSON.parse(JSON.stringify(worksData));
+    const isReferenced = (p: PendingUpload) =>
+      (p.type === "music" ? data.musicWorks : data.designWorks).some((w) => w.filename === p.filename);
+    // 一時保存後に取り消された画像はアップロードしない
+    let remaining = pendingUploads.filter(isReferenced);
 
-    if (res.ok) {
+    try {
+      const total = remaining.length;
+      for (const [i, p] of [...remaining].entries()) {
+        setStatusMsg(`アップロード中... (${i + 1}/${total}) ${p.filename}`);
+        const blob = await upload(blobPathname(p.type, p.filename), p.file, {
+          access: "public",
+          handleUploadUrl: "/api/admin/upload",
+          headers: authHeader,
+          multipart: p.file.size > 5 * 1024 * 1024,
+        });
+        const key = p.type === "music" ? "musicWorks" : "designWorks";
+        data[key] = data[key].map((w) => (w.filename === p.filename ? { ...w, filename: blob.url } : w));
+        // 途中で失敗しても、アップロード済みのものは再送しない
+        remaining = remaining.filter((r) => r !== p);
+        setWorksData(JSON.parse(JSON.stringify(data)));
+        setPendingUploads(remaining);
+      }
+
+      setStatusMsg("保存中...");
+      const res = await fetch("/api/admin/data", {
+        method: "PUT",
+        headers: { ...authHeader, "Content-Type": "application/json" },
+        body: JSON.stringify({ data, deletions: pendingDeletions }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? `HTTP ${res.status}`);
+      }
+
       setPendingUploads([]);
       setPendingDeletions([]);
+      setDataSource("blob");
       setIsCommitPending(false);
-      setStatusMsg("コミット完了！サイトに反映されるまで1〜2分かかります。");
-    } else {
-      setStatusMsg("コミットに失敗しました。");
+      setStatusMsg("保存しました！サイトには1分ほどで反映されます。");
+    } catch (e) {
+      setStatusMsg(`保存に失敗しました: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setIsCommitting(false);
     }
-    setIsCommitting(false);
   }
 
   // ── 削除 ──
@@ -881,10 +1105,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
 
     if (activeTab !== "news") {
       const work = item as Work;
-      if (work.filename) {
-        const type = activeTab as "music" | "design";
-        setPendingDeletions((prev) => [...prev, { filename: work.filename, type }]);
-      }
+      if (work.filename) setPendingDeletions((prev) => [...prev, work.filename]);
     }
 
     const updated = { ...worksData };
@@ -893,20 +1114,25 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
     else updated.newsData = worksData.newsData.filter((_, i) => i !== index);
     setWorksData(updated);
     setIsCommitPending(true);
-    setStatusMsg("削除しました。「全てコミット」でGitHubに反映されます。");
+    setStatusMsg("削除しました。「保存して公開」でサイトに反映されます。");
   }
 
   const list = currentList();
   const previewImageUrl = editImagePending?.localUrl ?? null;
 
   // デフォルトプレビュー: 編集中でなければリストの1番目を表示
-  const defaultPreviewWork = activeTab !== "news" && activeTab !== "player" && list.length > 0
+  const isTextTab = activeTab === "seo" || activeTab === "about";
+  const defaultPreviewWork = (activeTab === "music" || activeTab === "design") && list.length > 0
     ? list[0] as Work : null;
   const defaultPreviewNews = activeTab === "news" && list.length > 0
     ? list[0] as News : null;
-  // PLAYERタブ: 選択中スラッグの作品、未選択なら1番目
-  const playerPreviewWork = activeTab === "player" && worksData
-    ? (worksData.musicWorks.find(w => w.slug === playerSlug) ?? worksData.musicWorks[0] ?? null)
+  // PLAYERタブ: チェックの入った曲（並び順）。プレビューは1曲目を表示
+  const enabledTracks = worksData?.playerTracks.filter((t) => t.enabled && t.mp3Filename) ?? [];
+  const playlistTitles = enabledTracks.map((t) =>
+    worksData?.musicWorks.find((w) => w.slug === t.slug)?.title ?? displayFilename(t.mp3Filename));
+  const playerPreviewWork = activeTab === "player" && worksData && enabledTracks.length > 0
+    ? (worksData.musicWorks.find((w) => w.slug === enabledTracks[0].slug)
+      ?? { id: 0, slug: "", filename: "", title: playlistTitles[0] })
     : null;
 
   const previewWork = activeTab === "player"
@@ -951,7 +1177,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
         <div className="flex items-center gap-4 flex-wrap">
           <h1 className="font-['Bahnschrift'] text-base tracking-[0.3em]">INAGA ADMIN</h1>
           <nav className="flex gap-1">
-            {(["music", "design", "news", "player", "seo"] as ActiveTab[]).map((tab) => (
+            {(["music", "design", "news", "player", "about", "seo"] as ActiveTab[]).map((tab) => (
               <button key={tab} onClick={() => { setActiveTab(tab); cancelEdit(); }}
                 className={`px-3 py-1.5 text-xs font-['Bahnschrift'] tracking-widest rounded transition-colors ${activeTab === tab ? "bg-[#333333] text-white" : "text-gray-500 hover:bg-gray-100"}`}>
                 {tab.toUpperCase()}
@@ -963,7 +1189,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
           {isCommitPending && (
             <button onClick={handleCommitAll} disabled={isCommitting}
               className="px-4 py-2 text-xs font-['Bahnschrift'] tracking-widest bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap shadow-sm">
-              {isCommitting ? "コミット中..." : "全てコミット ↑"}
+              {isCommitting ? "保存中..." : "保存して公開 ↑"}
             </button>
           )}
           <button onClick={onLogout}
@@ -976,7 +1202,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
       {/* Banners */}
       {isCommitPending && (
         <div className="bg-amber-50 border-b border-amber-100 px-4 md:px-8 py-2 text-xs text-amber-700 font-['Bahnschrift'] tracking-wide">
-          ⚠ 未コミットの変更があります。右上の「全てコミット」でGitHubに反映されます。
+          ⚠ 未保存の変更があります。右上の「保存して公開」でサイトに反映されます。
         </div>
       )}
       {statusMsg && (
@@ -995,7 +1221,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             {/* PC / スマホ 切り替えタブ（SEOタブ以外で表示） */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase">Preview</p>
-              {activeTab !== "seo" && (
+              {!isTextTab && (
                 <div className="flex gap-1">
                   <button onClick={() => setPreviewMode("pc")}
                     className={`px-2 py-1 text-xs font-['Bahnschrift'] tracking-widest rounded transition-colors ${previewMode === "pc" ? "bg-[#333333] text-white" : "text-gray-400 hover:bg-gray-100"}`}>
@@ -1008,6 +1234,21 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                 </div>
               )}
             </div>
+
+            {/* ABOUT タブ: 本番の ABOUT セクションに近い見た目 */}
+            {activeTab === "about" && worksData && (
+              <div className="border border-gray-100 rounded-lg p-4 text-left text-[#333333]">
+                <p className="text-[16pt] font-['Bahnschrift'] tracking-widest mb-3">ABOUT</p>
+                <div className="font-['Mobo'] text-[9pt] leading-[2.1] tracking-[0.12em]">
+                  <p className="text-[24pt] font-['Mobo-bold'] leading-tight my-4 tracking-widest">
+                    {worksData.about.name || "（名前未入力）"}
+                  </p>
+                  {worksData.about.body.split("\n").map((line, i) => (
+                    <p key={i}>{line || "\u00a0"}</p>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* SEO タブ: SERP スニペットプレビュー */}
             {activeTab === "seo" && worksData && (
@@ -1024,14 +1265,14 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
               </div>
             )}
 
-            {activeTab !== "seo" && !previewWork && !previewNews && (
+            {!isTextTab && !previewWork && !previewNews && (
               <p className="text-xs opacity-30 font-['Bahnschrift'] tracking-widest text-center py-8">
                 作品がありません
               </p>
             )}
 
             {/* スマホモード: phone frame（固定サイズ・内部スクロール） */}
-            {(previewWork || activeTab === "news") && isMobilePreview && activeTab !== "seo" && (
+            {(previewWork || activeTab === "news") && isMobilePreview && !isTextTab && (
               <div className="mx-auto border-4 border-gray-800 rounded-[28px] overflow-hidden shadow-xl bg-white"
                 style={{ width: "212px", height: "440px", display: "flex", flexDirection: "column" }}>
                 {/* ノッチ */}
@@ -1041,7 +1282,7 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
                 {/* コンテンツ（スクロール可能・高さ固定） */}
                 <div className="overflow-y-auto bg-white flex-1">
                   {previewWork && activeTab === "player" && (
-                    <PlayerPreviewMobile work={previewWork} imageUrl={previewImageUrl} />
+                    <PlayerPreviewMobile work={previewWork} imageUrl={previewImageUrl} playlist={playlistTitles} />
                   )}
                   {previewWork && activeTab !== "player" && (
                     <MobileWorkPreview work={previewWork} imageUrl={previewImageUrl}
@@ -1061,10 +1302,10 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             )}
 
             {/* PCモード: 本番と同寸法で描画→scale縮小 */}
-            {(previewWork || activeTab === "news") && !isMobilePreview && activeTab !== "seo" && (
+            {(previewWork || activeTab === "news") && !isMobilePreview && !isTextTab && (
               <div className="bg-white border border-gray-100 rounded-lg p-3 overflow-y-auto max-h-[480px]">
                 {previewWork && activeTab === "player" && (
-                  <PlayerPreviewPC work={previewWork} imageUrl={previewImageUrl} />
+                  <PlayerPreviewPC work={previewWork} imageUrl={previewImageUrl} playlist={playlistTitles} />
                 )}
                 {previewWork && activeTab !== "player" && (
                   <PCWorkPreview work={previewWork} imageUrl={previewImageUrl}
@@ -1089,6 +1330,26 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
           {!worksData ? (
             <div className="flex items-center justify-center h-40">
               <p className="text-xs opacity-40 font-['Bahnschrift'] tracking-widest">読み込み中...</p>
+            </div>
+          ) : activeTab === "about" ? (
+            /* ── ABOUT タブ ── */
+            <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-4">
+              <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase">ABOUT 設定</p>
+              <TextField label="名前（大見出し）" value={worksData.about.name}
+                onChange={(v) => { setWorksData({ ...worksData, about: { ...worksData.about, name: v } }); setIsCommitPending(true); }}
+                placeholder="いなが" />
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-['Bahnschrift'] tracking-widest opacity-70 uppercase">
+                  本文
+                  <span className="ml-2 opacity-40 normal-case">改行ごとに1行で表示されます</span>
+                </label>
+                <textarea
+                  value={worksData.about.body}
+                  onChange={(e) => { setWorksData({ ...worksData, about: { ...worksData.about, body: e.target.value } }); setIsCommitPending(true); }}
+                  rows={8}
+                  className="border border-gray-200 rounded px-2 py-1.5 text-xs leading-relaxed resize-y focus:outline-none focus:border-gray-400"
+                />
+              </div>
             </div>
           ) : activeTab === "seo" ? (
             /* ── SEO タブ ── */
@@ -1151,70 +1412,9 @@ function AdminDashboard({ password, onLogout }: { password: string; onLogout: ()
             </div>
           ) : activeTab === "player" ? (
             /* ── PLAYER タブ ── */
-            <div className="flex flex-col gap-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <p className="text-xs font-['Bahnschrift'] tracking-widest opacity-50 uppercase mb-4">Player 設定</p>
-
-                {/* 楽曲選択 */}
-                <div className="flex flex-col gap-1 mb-4">
-                  <label className="text-xs font-['Bahnschrift'] tracking-widest opacity-70 uppercase">楽曲を選択</label>
-                  <select
-                    value={playerSlug}
-                    onChange={(e) => setPlayerSlug(e.target.value)}
-                    className="border border-gray-200 rounded px-2 py-1.5 text-xs focus:outline-none focus:border-gray-400 font-['Bahnschrift'] tracking-wide">
-                    <option value="">-- 選択してください --</option>
-                    {worksData.musicWorks.map((w) => (
-                      <option key={w.slug} value={w.slug}>{w.title}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* 選択中の作品プレビュー */}
-                {playerSlug && (() => {
-                  const w = worksData.musicWorks.find((m) => m.slug === playerSlug);
-                  return w ? (
-                    <div className="flex items-center gap-3 bg-gray-50 rounded p-3 mb-4">
-                      <img src={`/images/MUSIC WORKS/${w.filename}`} alt={w.title}
-                        className="w-12 h-12 object-cover shadow" />
-                      <div>
-                        <p className="text-xs font-['Mobo-bold'] tracking-wider">{w.title}</p>
-                        <p className="text-xs opacity-40 font-['Bahnschrift'] tracking-widest">INAGA</p>
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
-
-                {/* MP3アップロード */}
-                <div className="flex flex-col gap-1 mb-4">
-                  <label className="text-xs font-['Bahnschrift'] tracking-widest opacity-70 uppercase">MP3ファイル</label>
-                  <input type="file" accept=".mp3,audio/*" className="hidden"
-                    id="mp3-upload"
-                    onChange={(e) => { if (e.target.files?.[0]) handleMp3Select(e.target.files[0]); }} />
-                  <label htmlFor="mp3-upload"
-                    className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition-colors text-xs text-gray-500 font-['Bahnschrift'] tracking-widest cursor-pointer">
-                    ↑ MP3をアップロード
-                  </label>
-                  {playerMp3Pending ? (
-                    <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded px-3 py-2">
-                      <span className="text-xs text-blue-400 shrink-0">↑ 新規:</span>
-                      <span className="flex-1 text-xs font-['Bahnschrift'] tracking-wide truncate">{playerMp3Pending.filename}</span>
-                      <button onClick={() => setPlayerMp3Pending(null)} className="text-red-400 hover:text-red-600 shrink-0">
-                        <FiTrash2 className="text-sm" />
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="text-xs opacity-40 font-['Bahnschrift'] tracking-wide">
-                      現在: {worksData.playerTrack.mp3Filename}
-                    </p>
-                  )}
-                </div>
-
-                <button onClick={handlePlayerTempSave} disabled={!playerSlug}
-                  className="w-full py-2 text-xs font-['Bahnschrift'] tracking-widest bg-[#333333] text-white rounded hover:bg-[#555555] transition-colors disabled:opacity-40">
-                  一時保存
-                </button>
-              </div>
-            </div>
+            <PlayerTab tracks={worksData.playerTracks} musicWorks={worksData.musicWorks}
+              library={mp3Library} uploading={mp3Uploading}
+              onChangeTracks={setPlayerTracks} onUpload={handleMp3Upload} onDeleteMp3={handleMp3Delete} />
           ) : (
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">

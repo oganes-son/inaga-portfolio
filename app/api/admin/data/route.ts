@@ -1,87 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const REPO = "oganes-son/inaga-portfolio";
-const FILE_PATH = "data/works.json";
-const BRANCH = "main";
-
-function checkAuth(request: NextRequest) {
-  if (process.env.NODE_ENV === "development") return true;
-  const auth = request.headers.get("Authorization");
-  return auth === `Bearer ${process.env.ADMIN_PASSWORD}`;
-}
+import { revalidatePath, revalidateTag } from "next/cache";
+import { put, del } from "@vercel/blob";
+import { checkAdminAuth } from "@/lib/admin-auth";
+import { DATA_PATHNAME, SITE_DATA_TAG, fetchSiteDataFromBlob } from "@/lib/site-data";
+import { fallbackSiteData } from "@/lib/works";
 
 export async function GET(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!checkAdminAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const url = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}?ref=${BRANCH}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: "application/vnd.github.v3+json",
-    },
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    return NextResponse.json({ error: "Failed to fetch from GitHub" }, { status: 500 });
-  }
-
-  const json = await res.json();
-  const content = Buffer.from(json.content, "base64").toString("utf-8");
-  const data = JSON.parse(content);
-
-  return NextResponse.json({ data, sha: json.sha });
+  const data = await fetchSiteDataFromBlob();
+  return NextResponse.json({ data: data ?? fallbackSiteData, source: data ? "blob" : "repo" });
 }
 
+// 保存: works.json を Blob に上書きし、不要になったファイルを削除してページを再生成
 export async function PUT(request: NextRequest) {
-  if (!checkAuth(request)) {
+  if (!checkAdminAuth(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { data } = await request.json();
-
-  // Fetch latest SHA before saving
-  const shaUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}?ref=${BRANCH}`;
-  const shaRes = await fetch(shaUrl, {
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: "application/vnd.github.v3+json",
-    },
-    cache: "no-store",
-  });
-
-  if (!shaRes.ok) {
-    return NextResponse.json({ error: "Failed to fetch SHA from GitHub" }, { status: 500 });
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json({ error: "BLOB_READ_WRITE_TOKEN が設定されていません" }, { status: 500 });
   }
 
-  const shaJson = await shaRes.json();
-  const currentSha = shaJson.sha;
+  const { data, deletions = [] } = (await request.json()) as { data: unknown; deletions?: string[] };
+  const json = JSON.stringify(data, null, 2);
 
-  const content = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
-
-  const putUrl = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
-  const putRes = await fetch(putUrl, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: "application/vnd.github.v3+json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: "Update works.json via admin panel",
-      content,
-      sha: currentSha,
-      branch: BRANCH,
-    }),
-  });
-
-  if (!putRes.ok) {
-    const err = await putRes.text();
-    return NextResponse.json({ error: "Failed to update GitHub", detail: err }, { status: 500 });
+  try {
+    await put(DATA_PATHNAME, json, {
+      access: "public",
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      cacheControlMaxAge: 60,
+    });
+  } catch (e) {
+    return NextResponse.json({ error: "データの保存に失敗しました", detail: String(e) }, { status: 500 });
   }
 
-  const putJson = await putRes.json();
-  return NextResponse.json({ ok: true, newSha: putJson.content.sha });
+  // まだデータ内で参照されている URL は消さない
+  const toDelete = deletions.filter(
+    (url) => url.includes(".blob.vercel-storage.com/") && !json.includes(url),
+  );
+  if (toDelete.length > 0) {
+    try {
+      await del(toDelete);
+    } catch {
+      // 削除失敗はデータ保存の成否に影響させない
+    }
+  }
+
+  revalidateTag(SITE_DATA_TAG, { expire: 0 });
+  revalidatePath("/", "layout");
+
+  return NextResponse.json({ ok: true });
 }

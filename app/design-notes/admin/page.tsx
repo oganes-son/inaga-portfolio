@@ -136,7 +136,7 @@ function AdminDashboard({ password }: { password: string }) {
   async function handleCommit() {
     if (!worksData) return;
     setIsCommitting(true);
-    setStatusMsg("コミット中...");
+    setStatusMsg("保存中...");
     const res = await fetch("/api/admin/data", {
       method: "PUT",
       headers: { ...authHeader, "Content-Type": "application/json" },
@@ -144,9 +144,9 @@ function AdminDashboard({ password }: { password: string }) {
     });
     if (res.ok) {
       setIsCommitPending(false);
-      setStatusMsg("コミット完了！サイトに反映されるまで1〜2分かかります。");
+      setStatusMsg("保存しました！サイトには1分ほどで反映されます。");
     } else {
-      setStatusMsg("コミットに失敗しました。");
+      setStatusMsg("保存に失敗しました。");
     }
     setIsCommitting(false);
   }
