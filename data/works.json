@@ -1,6 +1,20 @@
 {
   "musicWorks": [
     {
+      "id": 12,
+      "slug": "phantasmage",
+      "filename": "phantasmage.png",
+      "title": "Phantasmage",
+      "description": "北大DTM作曲サークルNMPASSのコンピレーションアルバム「魔法概論Ⅱ」収録。",
+      "tools": "Cakewalk SONAR",
+      "soundcloud": "​ https://soundcloud.com/sgextgl4iyy9/",
+      "youtube": "",
+      "niconico": "",
+      "spotify": "",
+      "appleMusic": "",
+      "amazonMusic": ""
+    },
+    {
       "id": 4,
       "slug": "purify",
       "filename": "Purify.png",
